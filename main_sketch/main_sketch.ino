@@ -1,12 +1,14 @@
 #include <SoftwareSerial.h>
 #include "wireless.h"
 
+
 SoftwareSerial HC12(10, 11); // HC-12 TX Pin, HC-12 RX Pin
 
 void setup() {
   Serial.begin(9600);             // Serial port to computer
-  HC12.begin(9600);               // Serial port to HC12
-
+  HC12.begin(9600)                // Serial port to HC12
+  delay(1000)                     // Wait for serial connection
+  Serial.println(test_func());
 }
 
 void loop() {
