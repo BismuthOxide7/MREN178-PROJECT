@@ -19,6 +19,14 @@ int initialise_transciever(int tx_pin, int rx_pin) {
     return 0;  // Return success
 }
 
+void config_transciever(int num_player){
+  // NEED TO PULL 'SET' PIN LOW FOR COMMANDS
+  // Set wireless baudrate
+  HC12.l
+  // Set channel for communication
+}
+
+
 // Function to send a command packet
 void hc12_send(CommandType cmd, Card_struct card = {'X',-1,'X'}) {
     CommandPacket packet; //init packet struct
