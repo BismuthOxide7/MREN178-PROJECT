@@ -3,7 +3,7 @@
 #include "cards.h"
 #include <SoftwareSerial.h>
 
-#define BAUDRATE 9600  // Corrected #DEFINE to #define
+#define BAUDRATE 9600 // Globally delcared baud rate
 
 // HC-12 instance (declared globally)
 SoftwareSerial HC12(10, 11);  // TX: 10, RX: 11
