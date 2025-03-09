@@ -22,7 +22,7 @@ int initialise_transciever(int tx_pin, int rx_pin) {
 void config_transciever(int num_player){
   // NEED TO PULL 'SET' PIN LOW FOR COMMANDS
   // Set wireless baudrate
-  HC12.l
+  //
   // Set channel for communication
 }
 
