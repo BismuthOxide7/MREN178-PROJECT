@@ -32,7 +32,7 @@ struct Node createNode(struct Card_struct card){
   return newNode;
 }
 
-// Update LCD 
+// Update LCD display with linked lists and hidden card 
 void update_LCD(){
   lcd.clear();
   lcd.setCursor(0,0);
@@ -42,21 +42,19 @@ void update_LCD(){
     transverser = transverser.next;
   }
   lcd.setCursor(1,0);
-  //need to replace with if statement with a flag to check if the hidden card needs to be flipped over 
+  // TODO; need to replace with if statement with a flag to check if the hidden card needs to be flipped over 
   lcd.print ("H"); //printing hidden card - later needs to be shown 
   lcd.setCursor(1,1);
   transverser = dealer_cards;
   while(transverser != NULL){
     lcd.print(transverser -> card.friendlyName);
     transverser = transverser.next;
-  }
-  // TODO: Update display with linked lists and hidden cards 
+  } 
 }
 
-// Function implimentations
+// Function implimentations player cards linked list 
 int add_player_card(struct Card_struct &card){
   struct node = createNode(card); 
-  // TODO: Add card to player cards linked list 
   if (player_cards == NULL){
     player_cards = &node;
   }
@@ -68,18 +66,55 @@ int add_player_card(struct Card_struct &card){
   return 0;
 }
 
+//Function implimentations hidden dealer card
 int add_hidden_dealer_card(struct Card_struct &card){
   hidden_dealer_card = card;
   update_LCD(); 
   return 0;
+  
 }
+//Function implimentations dealer visable cards linked list 
 int add_visable_dealer_card(struct Card_struct &card){
-  // TODO: Add card to dealer visable cards linked list 
-  update_LCD();
+  struct node = createNode(card); 
+  if (dealer_cards == NULL){
+    dealer_cards = &node;
+  }
+  else {
+    node.next = dealer_cards;
+    dealer_cards = &node;
+  }
+  update_LCD(); 
   return 0;
 }
+
+int clear_list(struct Node* p_head){
+  Node *p_temp;
+  Node *p_tail;
+  while (p_head != NULL) {
+      p_temp = p_head;
+      // Checking if there is only one node in the list and if so deleting it 
+      if(p_temp -> next == NULL){
+        p_head = NULL;
+        free(p_temp);
+      }
+      // Search for the node preceeding the tail node. Once found, date the old tail node, and update this preceeding node to become 
+      // The new tail node by setting p_next_node to null and setting p_tail to point to this node 
+      else{
+        while (p_temp -> next -> next != NULL){
+          p_temp=p_temp->next;
+        }
+        p_tail = p_temp -> next;
+        p_temp -> next = NULL;
+        free(p_tail); 
+      }
+    }
+}
+// delete all pre-existing cards in linked lists and hidden dealer card
 int new_game (){
-  // TODO: delete all pre-existing cards in linked lists and hidden dealer card
+  clear_list(player_list);
+  clear_list(dealer_list);
+  hidden_dealer_card = NULL;
+  
   update_LCD(); 
   return 0;
 }
