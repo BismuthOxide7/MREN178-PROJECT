@@ -25,7 +25,7 @@ int initalise_transciever() {
 }
 
 // Function to send a command packet
-void hc12_send(CommandType cmd, Card_struct card = {'X',-1,'X'}) {
+void hc12_send(int ID, CommandType cmd, Card_struct card = {'X', -1, 'X'}, int bet = 0) {
     CommandPacket packet; //init packet struct
     packet.command = cmd; //assign command
     packet.card = card; // assign card (default is the null card X,-1,X)
