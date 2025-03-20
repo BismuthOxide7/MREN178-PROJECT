@@ -1,14 +1,9 @@
-#ifndef _BUTTONS_H
-#define _BUTTONS_H
+#ifndef BUTTONS_H
+#define BUTTONS_H
 
 #include <Arduino.h>
-#include "wireless.h"  // Needed to send commands
 
-#define BTN_HIT 2  // Define button pins
-#define BTN_STAY 3
-#define BTN_FOLD 4
-#define BTN_BET 5
-#define BTN_VIEW 6
+#define BTN_PIN A0  // All buttons use A0 on the LCD shield
 
 void setupButtons();
 void checkButtons();
