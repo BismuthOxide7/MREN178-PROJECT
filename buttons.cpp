@@ -1,6 +1,3 @@
-#include "buttons.h"
-#include "wireless.h"  // Needed to send game commands
-
 void checkButtons() {
     int buttonValue = analogRead(BTN_PIN);
 
@@ -18,12 +15,13 @@ void checkButtons() {
         Serial.print("Selected: ");
         Serial.println(menuItems[menuIndex]);
 
+        // Show the selected action on the LCD
         lcd.clear();
         lcd.setCursor(0, 0);
         lcd.print("Selected:");
         lcd.setCursor(0, 1);
         lcd.print(menuItems[menuIndex]);
-        delay(1000);
+        delay(1000);  // Show selection for 1 second
 
         // Perform action based on selection
         switch (menuIndex) {
@@ -48,6 +46,12 @@ void checkButtons() {
                 hc12_send(CMD_RECEIVE_THIS_CARD);
                 break;
         }
+
+        // After the action is processed, return to the menu
+        updateMenu();
+    }
+}
+
 
         updateMenu(); // Return to menu
     }
