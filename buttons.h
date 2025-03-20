@@ -2,10 +2,14 @@
 #define BUTTONS_H
 
 #include <Arduino.h>
+#include <LiquidCrystal.h> 
 
-#define BTN_PIN A0  // All buttons use A0 on the LCD shield
+// LCD Keypad Shield uses A0 for button input
+#define BTN_PIN A0  
 
+// Menu navigation
 void setupButtons();
 void checkButtons();
+void updateMenu();
 
 #endif
