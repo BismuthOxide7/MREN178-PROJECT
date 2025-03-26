@@ -20,6 +20,8 @@ typedef enum {
 
 // Struct to hold a command and optional card data
 typedef struct {
+    const short int ID; // Player ID
+    int betAmount; // bet amount
     CommandType command;  // Command type
     Card_struct card;     // Card (optional)
 } CommandPacket;
