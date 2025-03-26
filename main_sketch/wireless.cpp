@@ -2,11 +2,12 @@
 #include "wireless.h"
 #include "cards.h"
 #include <SoftwareSerial.h>
+#include <string.h>
 
 #define BAUDRATE 9600  // Corrected #DEFINE to #define
 
 // HC-12 instance (declared globally)
-SoftwareSerial HC12(10, 11);  // TX: 10, RX: 11
+SoftwareSerial HC12(12, 11);  // TX: 10, RX: 11
 
 // test function (to see if the header files and #includes worked)
 int test_fun() {
@@ -20,39 +21,51 @@ int initialise_transciever(int tx_pin, int rx_pin) {
 }
 
 void config_transciever(int num_player){
-  // NEED TO PULL 'SET' PIN LOW FOR COMMANDS
-  // Set wireless baudrate
-  //
-  // Set channel for communication
+    //Probabry dont need to actually do this is the config is done beforehand
+    return;
 }
 
 
 // Function to send a command packet
-void hc12_send(CommandType cmd, Card_struct card = {'X',-1,'X'}) {
-    CommandPacket packet; //init packet struct
-    packet.command = cmd; //assign command
-    packet.card = card; // assign card (default is the null card X,-1,X)
+void hc12_send(CommandPacket packet) {
+    //Message order: <ID, CMD, BET, (SUIT, VALUE, FRIENDLYNAME)>
+    String message = '<' String(packet.ID) + "," + String(packet.command) + "," + String(packet.betAmount) + "," + '(' + packet.card.suit + ',' 
+    + packet.card.value + ',' + packet.card.friendlyName + ')' + '>';    
     
-    HC12.write((uint8_t*)&packet, sizeof(CommandPacket));  // Send as bytes
+    // Send the string via HC12
+    HC12.print(message);
 }
 
 // Function to receive a command packet
 void hc12_receive() {
-    CommandPacket packet; //init packet
-    static uint8_t buffer[sizeof(CommandPacket)];  // Buffer for incoming data
-    static uint8_t index = 0;  // Tracks received bytes
-
-    while (HC12.available()) {
-        buffer[index] = HC12.read();  // Read byte
-        index++; // move to next buffer spot
-
-        // If we have a full packet, process it
-        if (index >= sizeof(CommandPacket)) {
-            memcpy(&packet, buffer, sizeof(CommandPacket));  // Copy buffer data into the packet
-            processCommand(packet);  // Handle received command
-            index = 0;  // Reset buffer index
-        }
+    String data = "";
+  
+    // If HC-12 has data, read it
+    switch(HC12.peek()){
+        case '<':
+            while (HC12.available()) {        
+                data += (char)HC12.read();      // Read the byte from HC12 and add to the string
+            }
+            break;
+        default:
+            return;
     }
+
+    CommandPacket packet; // Create a new packet
+    packet.ID = data.substring(1, data.indexOf(",")).toInt(); // Extract ID
+    data = data.substring(data.indexOf(",") + 1); // Remove ID from string
+    packet.command = (CommandType)data.substring(0, data.indexOf(",")).toInt(); // Extract command
+    data = data.substring(data.indexOf(",") + 1); // Remove command from string
+    packet.betAmount = data.substring(0, data.indexOf(",")).toInt(); // Extract bet amount
+    data = data.substring(data.indexOf("(") + 1); // Remove bet amount from string
+    packet.card.suit = data.substring(0, data.indexOf(",")).toInt(); // Extract suit
+    data = data.substring(data.indexOf(",") + 1); // Remove suit from string
+    packet.card.value = data.substring(0, data.indexOf(",")).toInt(); // Extract value
+    data = data.substring(data.indexOf(",") + 1); // Remove value from string
+    packet.card.friendlyName = data.substring(0, data.indexOf(")")); // Extract friendly name
+        
+    processCommand(packet); // Process the command
+    return;
 }
 
 // Function to handle received commands
