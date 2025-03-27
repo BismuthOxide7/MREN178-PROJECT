@@ -1,3 +1,9 @@
+#include "wireless.h"
+#include "cards.h"
+#include "actions.h"
+#include <LiquidCrystal.h>
+
+
 void checkButtons() {
     int buttonValue = analogRead(BTN_PIN);
 
@@ -52,7 +58,3 @@ void checkButtons() {
     }
 }
 
-
-        updateMenu(); // Return to menu
-    }
-}

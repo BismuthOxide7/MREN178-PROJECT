@@ -2,6 +2,7 @@
 #include "wireless.h"
 #include "cards.h"
 #include <SoftwareSerial.h>
+#include "actions.h"
 
 #define rx = 11, tx = 12
 
@@ -97,28 +98,39 @@ void processCommand(CommandPacket packet) {
             }
             break;
         case CMD_RECEIVE_THIS_CARD:
-            Serial.print("Received Card: ");// debug print
-            Serial.print(packet.card.suit);// debug print
-            Serial.print(" ");// debug print
-            Serial.println(packet.card.value);// debug print
+            Serial.println("Processing RECEIVE_CARD command...");
+            // Extract player ID and card details from the packet
+            int playerID = packet.ID;  // Player number
+            Card_struct receivedCard;
+            receivedCard.friendlyName = packet.card.friendlyName;  // Card rank (e.g., 2-10, J, Q, K, A)
+            receivedCard.suit = packet.card.suit;  // Card suit (e.g., Hearts, Diamonds, etc.)
+            receivedCard.value = packet.card.value; // Card value (e.g., 10 for face cards, 11 for Ace)
+
+        // Add the card to the player's hand
+            addCardToHand(&playerQueue[playerID], receivedCard);
             break;
         case CMD_HIT:
-            Serial.println("Received: HIT");// debug print
+            Serial.println("Processing HIT command...");
+            hit(&playerQueue[packet.ID]);  // Call the hit function for the player
             break;
         case CMD_STAY:
-            Serial.println("Received: STAY");// debug print
+            Serial.println("Processing STAY command...");
+            stand(&playerQueue[packet.ID]);  // Call the stand function for the player
             break;
         case CMD_FOLD:
-            Serial.println("Received: FOLD");// debug print
+            Serial.println("Processing FOLD command...");
+            fold(&playerQueue[packet.ID]);  // Call the fold function for the player
             break;
-        case CMD_WIN:
-            Serial.println("Received: WIN");// debug print
+        case CMD_BET:
+            Serial.println("Processing BET command...");
+            initialBet(&playerQueue[packet.ID]);  // Call the initialBet function for the player
             break;
-        case CMD_LOSE:
-            Serial.println("Received: LOSE");// debug print
+        case CMD_DOUBLE_DOWN:
+            Serial.println("Processing DOUBLE DOWN command...");
+            doubleDown(&playerQueue[packet.ID]);  // Call the doubleDown function for the player
             break;
         default:
-            Serial.println("Unknown command received");// debug print
+            Serial.println("Unknown command received.");
             break;
     }
 }

@@ -1,43 +1,79 @@
 #include "wireless.h"
 #include "cards.h"
 #include "actions.h"
+#include "display.h"
+#include "buttons.h"
 #include <EEPROM.h>
 
+// Global variables
 int ID;
-//global variables
-
-int currTurn = 0;  //index of current player- ease of print later on
-player* circleQueueHead; //points to the current player
-
+int currTurn = 0;  // Index of the current player
+player* playerQueue[4];  // Circular queue for players
+int numPlayers = 4;  // Total number of players
+player* circleQueueHead;  // Points to the current player
 
 void setup() {
-  EEPROM.get(0, ID); // Read the ID from EEPROM
+  // Initialize ID from EEPROM
+  EEPROM.get(0, ID);
 
-  Serial.begin(9600); // Serial port to computer
-  bool players[3] = {false, false, false}; //array to keep track of who is playing
-  getPlayersAvailable(&players); //get the number of players
-  numPlayers = actions.startUp(players)/////////////////////////////////////////////////////////////////////
-  player *playerQueue[numPlayers]; 
+  Serial.begin(9600);  // Serial port to computer
+
+  // Initialize wireless communication
+  bool players[3] = {false, false, false};  // Array to track active players
+  getPlayersAvailable(players);  // Get the number of players available
+
+  // Initialize players
+  numPlayers = startUp(players);  // Initialize players and get the count
   for (int i = 0; i < numPlayers; i++) {
-    playerQueue[i] = (player *)malloc(sizeof(player)); //setting up the hand for each- allocating mem
-    actions.hit(playerQueue[i]); //first starting card
-    actions.hit(playerQueue[i]); //second starting card
-    playerQueue[i]->playerNumber = i+1;
+    playerQueue[i] = (player*)malloc(sizeof(player));  // Allocate memory for each player
+    actions.hit(playerQueue[i]);  // First starting card
+    actions.hit(playerQueue[i]);  // Second starting card
+    playerQueue[i]->playerNumber = i + 1;
   }
-  circleQueueHead = playerQueue[0]; //starting with the first player
+  circleQueueHead = playerQueue[0];  // Start with the first player
+
+  // Initialize display
+  new_game();  // Clear the display for a new game
 }
 
 void loop() {
- if( circleQueueHead->outOfGame == false){
-  //talk to erin and yasmine
- }
+  // Check if the current player is still in the game
+  if (!circleQueueHead->outOfGame) {
+    // Display the current player's turn
+    Serial.print("Player ");
+    Serial.print(circleQueueHead->playerNumber);
+    Serial.println("'s turn!");
 
- if(*circleQueueHead == playerQueue[numPlayers -1]) //chaning turn (typo but im pissed off at the curser)
- {
-  circleQueueHead = playerQueue[0];
-  currPlayer = 1;
- }
- else{
-  circleQueueHead = playerQueue[currPlayers]; //currplayer is always one higher to account for the 0th spot in the array, so this increases the turn by 1
-  currPlayer++;
+    // Check buttons for player action
+    checkButtons();
+
+    // Perform action based on button press
+    switch (menuIndex) {
+      case 0:  // Hit
+        actions.hit(circleQueueHead);
+        break;
+      case 1:  // Stand
+        actions.stand(*circleQueueHead);
+        break;
+      case 2:  // Fold
+        actions.fold(*circleQueueHead);
+        break;
+      case 3:  // Double Down
+        actions.doubleDown(*circleQueueHead);
+        break;
+      default:
+        break;
+    }
+
+    // Update the display
+    update_LCD();
+  }
+
+  // Move to the next player in the circular queue
+  if (circleQueueHead == playerQueue[numPlayers - 1]) {
+    circleQueueHead = playerQueue[0];
+    currTurn = 0;
+  } else {
+    circleQueueHead = playerQueue[++currTurn];
+  }
 }
