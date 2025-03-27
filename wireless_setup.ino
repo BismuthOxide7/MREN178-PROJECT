@@ -1,14 +1,4 @@
 #include <SoftwareSerial.h>
-CommandPacket packet;
-
-SoftwareSerial HC12(11,12); // HC-12 TX Pin, HC-12 RX Pin
-
-// Card struct definition
-typedef struct {
-  char suit;          // 'H' = Hearts, 'D' = Diamonds, 'C' = Clubs, 'S' = Spades
-  int value;          // 1-13 (Ace to King)
-  char friendlyName;  // 'A' for Ace, '2'-'9', 'T' for 10, 'J' for Jack, 'Q' for Queen, 'K' for King
-} Card_struct;
 
 // Define available commands
 typedef enum {
@@ -24,65 +14,80 @@ typedef enum {
 } CommandType;
 
 typedef struct {
-    int ID;               // Player ID
+  char suit;          // 'H' = Hearts, 'D' = Diamonds, 'C' = Clubs, 'S' = Spades
+  int value;          // 1-13 (Ace to King)
+  char friendlyName;  // 'A' for Ace, '2'-'9', 'T' for 10, 'J' for Jack, 'Q' for Queen, 'K' for King
+} Card_struct;
+
+
+// Struct to hold a command and optional card data
+typedef struct {
+    int ID; // Player ID
+    int betAmount; // bet amount
     CommandType command;  // Command type
     Card_struct card;     // Card (optional)
-    int bet;              // Bet amount (optional)
 } CommandPacket;
 
-void setup() {
-  Serial.begin(9600);             // Serial port to computer
-  HC12.begin(9600);               // Serial port to HC12
 
+SoftwareSerial HC12(12, 11);  // TX: 12, RX: 11
+
+void setup(){
+  Serial.begin(9600);
+  HC12.begin(9600);
+  delay(3000);
 }
 
-//TRANSMISSION STANDARD: \ID, COMMAND, CARD, BET/
-
-void loop() {
-if(HC12.available()) test_receive();
-    CommandPacket packet;
-    packet.ID = 0;
-    packet.command = CMD_PING;
-    packet.card = {'H', 1, 'A'};
-    packet.bet = 0;
-    test_send(packet);
-    delay(3000);
-}\
-
-void test_send(CommandPacket packet){
-    HC12.print("\\");
-    HC12.print(packet.ID);
-    HC12.print(",");
-    HC12.print(packet.command);
-    HC12.print(",");
-    HC12.print(packet.card.suit);
-    HC12.print(",");
-    HC12.print(packet.card.value);
-    HC12.print(",");
-    HC12.print(packet.card.friendlyName);
-    HC12.print(",");
-    HC12.print(packet.bet);
-    HC12.print("/");
-    Serial.println("Sent Packet");
-
+void loop(){
+  if(HC12.available()) hc12_receive();
+  Card_struct card = {'H', 1, 'A'};
+  CommandPacket packet = {1, 10, CMD_PING, card};  // Changed to CMD_PING for testing
+  hc12_send(packet);
+  delay(5000);
 }
 
-void test_receive(){
-    while(HC12.peek() != '\\'){
-        HC12.read();
+
+// Function to send a command packet
+void hc12_send(CommandPacket packet) {
+    // Message order: <ID, CMD, BET, (SUIT, VALUE, FRIENDLYNAME)>
+    String message = '<' + String(packet.ID) + "," + String(packet.command) + "," + String(packet.betAmount) + "," + '(' + String(packet.card.suit) + ',' 
+    + String(packet.card.value) + ',' + String(packet.card.friendlyName) + ')' + '>';    
+    Serial.println("sent: " + message);
+    // Send the string via HC12
+    HC12.print(message);
+}
+
+// Function to receive a command packet
+void hc12_receive() {
+    String data = "";
+  
+    // If HC-12 has data, read it until '>'
+    if (HC12.peek() == '<') {
+        while (HC12.available()) {        
+            char receivedChar = (char)HC12.read();
+            data += receivedChar;
+            if (receivedChar == '>'){
+              // DEBUG
+              Serial.println("rcv: " + data);
+              break;  // Stop reading when '>' is found
+            }
+        }
+    } else {
+      while(HC12.peek() != '<') Serial.print(HC12.read()); // consume char
     }
 
-    HC12.read(); //remove the delimiter \
-    packet.ID = HC12.parseInt();
-    HC12.read(); //remove the delimiter ,
-    packet.command = (CommandType)HC12.parseInt();
-    HC12.read(); //remove the delimiter ,
-    packet.card.suit = HC12.read();
-    HC12.read(); //remove the delimiter ,
-    packet.card.value = HC12.parseInt();
-    HC12.read(); //remove the delimiter ,
-    packet.card.friendlyName = HC12.read();
-    HC12.read(); //remove the delimiter ,
-    packet.bet = HC12.parseInt();
-    HC12.read(); //remove the delimiter /
+    CommandPacket packet; // Create a new packet
+    packet.ID = data.substring(1, data.indexOf(",")).toInt(); // Extract ID
+    data = data.substring(data.indexOf(",") + 1); // Remove ID from string
+    packet.command = (CommandType)data.substring(0, data.indexOf(",")).toInt(); // Extract command
+    data = data.substring(data.indexOf(",") + 1); // Remove command from string
+    packet.betAmount = data.substring(0, data.indexOf(",")).toInt(); // Extract bet amount
+    data = data.substring(data.indexOf("(") + 1); // Remove bet amount from string
+    packet.card.suit = data.substring(0, data.indexOf(",")).charAt(0); // Extract suit
+    data = data.substring(data.indexOf(",") + 1); // Remove suit from string
+    packet.card.value = data.substring(0, data.indexOf(",")).toInt(); // Extract value
+    data = data.substring(data.indexOf(",") + 1); // Remove value from string
+    packet.card.friendlyName = data.substring(0, data.indexOf(",")).charAt(0); // Extract friendly name
+        
+    // Process command or do something with the packet here
+    return;
 }

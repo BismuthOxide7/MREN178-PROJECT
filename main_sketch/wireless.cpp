@@ -25,21 +25,15 @@ int initalise_transciever() {
 }
 
 // Function to send a command packet
-void hc12_send(int ID, CommandType cmd, Card_struct card = {'X', -1, 'X'}, int bet = 0) {
-    CommandPacket packet; //init packet struct
-    packet.command = cmd; //assign command
-    packet.card = card; // assign card (default is the null card X,-1,X)
-    
-    HC12.write((uint8_t*)&packet, sizeof(CommandPacket));  // Send as bytes
-}
 void hc12_send(CommandPacket packet) {
     // Message order: <ID, CMD, BET, (SUIT, VALUE, FRIENDLYNAME)>
     String message = '<' + String(packet.ID) + "," + String(packet.command) + "," + String(packet.betAmount) + "," + '(' + String(packet.card.suit) + ',' 
     + String(packet.card.value) + ',' + String(packet.card.friendlyName) + ')' + '>';    
-    //DEBUG: Serial.println("sent: " + message);
+    //Serial.println("sent: " + message);
     // Send the string via HC12
     HC12.print(message);
 }
+
 
 
 // Function to receive a command packet
