@@ -1,5 +1,7 @@
 #include <SoftwareSerial.h>
 
+#define PROGRAM false; // Set to false to run the program, true to program the HC12
+
 // Define available commands
 typedef enum {
     CMD_NONE = 0,           // Default / No command
@@ -38,11 +40,21 @@ void setup(){
 }
 
 void loop(){
-  if(HC12.available()) hc12_receive();
-  Card_struct card = {'H', 1, 'A'};
-  CommandPacket packet = {1, 10, CMD_PING, card};  // Changed to CMD_PING for testing
-  hc12_send(packet);
-  delay(5000);
+  if(PROGRAM){
+    while(1){
+        if(HC12.available()) debugRead();
+        HC12.print(Serial.read());
+    }
+  } else {
+    while(1){
+        if(HC12.available()) hc12_receive();
+        Card_struct card = {'H', 1, 'A'};
+        CommandPacket packet = {1, 10, CMD_PING, card};  // Changed to CMD_PING for testing
+        hc12_send(packet);
+        delay(5000);
+    }
+  }
+
 }
 
 
@@ -90,4 +102,10 @@ void hc12_receive() {
         
     // Process command or do something with the packet here
     return;
+}
+
+void debugRead(){
+  if(Serial.available()){
+    Serial.print(HC12.read());
+  }
 }
