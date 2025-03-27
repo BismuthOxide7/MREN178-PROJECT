@@ -33,4 +33,6 @@ int initialise_transciever(int tx_pin, int rx_pin);
 void hc12_send(CommandPacket packet);
 void hc12_receive();
 
+bool getPlayersAvailable(bool *players);
+
 #endif

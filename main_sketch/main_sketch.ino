@@ -14,7 +14,9 @@ void setup() {
   EEPROM.get(0, ID); // Read the ID from EEPROM
 
   Serial.begin(9600); // Serial port to computer
-  numPlayers = actions.startUp(/*BENS SIGNALS*/)/////////////////////////////////////////////////////////////////////
+  bool players[3] = {false, false, false}; //array to keep track of who is playing
+  getPlayersAvailable(&players); //get the number of players
+  numPlayers = actions.startUp(players)/////////////////////////////////////////////////////////////////////
   player *playerQueue[numPlayers]; 
   for (int i = 0; i < numPlayers; i++) {
     playerQueue[i] = (player *)malloc(sizeof(player)); //setting up the hand for each- allocating mem

@@ -10,6 +10,13 @@
 // HC-12 instance (declared globally)
 SoftwareSerial HC12(tx, rx);  // TX: 10, RX: 11 in #define
 
+// Global variables
+int i;
+bool hasAcknowledged = false;
+int temp_ID;
+
+
+
 // test function (to see if the header files and #includes worked)
 int test_fun() {
     return 178;
@@ -77,9 +84,17 @@ void processCommand(CommandPacket packet) {
     switch (packet.command) { // switch case through the commands enum
         case CMD_PING:
             Serial.println("Received: PING"); // debug print
+            //return an ACK
+            if(packet.ID == ID){
+                HC12.print("<0,1,0,(0,0,0)>"); //Send back to 0 all players
+            }
             break;
         case CMD_ACK:
             Serial.println("Received: ACK");// debug print
+            if(ID == 0){
+                hasAcknowledged = true;
+                temp_ID = packet.ID;
+            }
             break;
         case CMD_RECEIVE_THIS_CARD:
             Serial.print("Received Card: ");// debug print
@@ -106,4 +121,28 @@ void processCommand(CommandPacket packet) {
             Serial.println("Unknown command received");// debug print
             break;
     }
+}
+
+// Function to get the number of players available
+bool getPlayersAvailable(bool *players) {
+    // Get the number of players available
+    // For now, we will assume that there are 3 players
+    //check all players availability - slight delay between each response to avoid collision
+   
+    for(i = 1; i <= 3; i++){
+        HC12.print("<" + String(i) + ",1,0,(0,0,0)>"); //Send PING player i 
+        while(!HC12.available());
+        String data = "";
+        while (HC12.available()){
+            hc12_receive();
+            delay(100);
+            if(hasAcknowledged){
+                hasAcknowledged = false;
+                *players[temp_ID] = true;
+                break;
+            }
+        }
+        delay(200);
+    }
+    return true;
 }
