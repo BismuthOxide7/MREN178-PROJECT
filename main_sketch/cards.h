@@ -6,7 +6,7 @@
 // Card struct definition
 typedef struct {
   char suit;          // 'H' = Hearts, 'D' = Diamonds, 'C' = Clubs, 'S' = Spades
-  int value;          // 1-13 (Ace to King)
+  int value;          // 1-10 (Ace to King)
   char friendlyName;  // 'A' for Ace, '2'-'9', 'T' for 10, 'J' for Jack, 'Q' for Queen, 'K' for King
 } Card_struct;
 
