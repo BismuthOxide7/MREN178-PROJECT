@@ -20,17 +20,17 @@ typedef enum {
 
 // Struct to hold a command and optional card data
 typedef struct {
-    int ID;             // ID of the sender
     CommandType command;  // Command type
     int betAmount;      // Bet amount (optional)
     Card_struct card;     // Card (optional)
+    int bet;              // Bet amount (optional)
 } CommandPacket;
 
 // Function prototypes
 int test_fun();
 void processCommand(CommandPacket packet);
 int initialise_transciever(int tx_pin, int rx_pin);
-void hc12_send(CommandPacket packet);
+void hc12_send(CommandType cmd, Card_struct card = {'X', -1, 'X'});
 void hc12_receive();
 
 #endif

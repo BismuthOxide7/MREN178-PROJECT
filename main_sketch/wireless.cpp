@@ -3,10 +3,12 @@
 #include "cards.h"
 #include <SoftwareSerial.h>
 
-#define BAUDRATE 9600  // Corrected #DEFINE to #define
+#define rx = 11, tx = 12
+
+#define BAUDRATE 9600 // Globally delcared baud rate
 
 // HC-12 instance (declared globally)
-SoftwareSerial HC12(10, 11);  // TX: 10, RX: 11
+SoftwareSerial HC12(tx, rx);  // TX: 10, RX: 11 in #define
 
 // test function (to see if the header files and #includes worked)
 int test_fun() {
@@ -14,12 +16,22 @@ int test_fun() {
 }
 
 // Function to initialize the transceiver
-int initialise_transciever(int tx_pin, int rx_pin) {
+int initalise_transciever() {
     HC12.begin(BAUDRATE);  // Start communication
-    return 0;  // Return success
+    delay(100); // Wait
+    if(HC12.available()){
+        return 0;  // Return success
+    } else return 1; // return failure. 
 }
 
 // Function to send a command packet
+void hc12_send(int ID, CommandType cmd, Card_struct card = {'X', -1, 'X'}, int bet = 0) {
+    CommandPacket packet; //init packet struct
+    packet.command = cmd; //assign command
+    packet.card = card; // assign card (default is the null card X,-1,X)
+    
+    HC12.write((uint8_t*)&packet, sizeof(CommandPacket));  // Send as bytes
+}
 void hc12_send(CommandPacket packet) {
     // Message order: <ID, CMD, BET, (SUIT, VALUE, FRIENDLYNAME)>
     String message = '<' + String(packet.ID) + "," + String(packet.command) + "," + String(packet.betAmount) + "," + '(' + String(packet.card.suit) + ',' 

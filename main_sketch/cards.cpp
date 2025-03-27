@@ -5,7 +5,7 @@ Card_struct make_card(char suit, int value, char friendlyName) {
   Card_struct card; // init card struct
   card.suit = suit; // assign suit
   card.value = value; // assign value 
-  card.friendlyName = friendlyName; // assign frendlyname
+  card.friendlyName = friendlyName; // assign friendlyname
   return card;
 }
 
