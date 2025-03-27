@@ -1,5 +1,5 @@
 #include "cards.h"
-#include "player.h"
+#include "actions.h"
 
 int tokens;
 int numPlayers = 4;
