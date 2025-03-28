@@ -19,12 +19,6 @@ Card_struct hidden_dealer_card;
 Node* player_cards = NULL;
 Node* dealer_cards = NULL;
 
-// Struct to define linked list for added player cards and added visible dealer cards with two different heads 
-struct Node {
-  Node* next;
-  Card_struct card;
-};
-
 // Create node
 Node* createNode(Card_struct card) {
   Node* newNode = (Node*)malloc(sizeof(Node));

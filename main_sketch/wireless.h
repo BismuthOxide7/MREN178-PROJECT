@@ -14,12 +14,14 @@ typedef enum {
     CMD_HIT,                // Player requests a hit
     CMD_STAY,               // Player chooses to stay
     CMD_FOLD,               // Player folds
+    CMD_DOUBLE_DOWN,        // player doubles bet and hits
     CMD_WIN,                // Player wins this game
     CMD_LOSE                // Player lost this game
 } CommandType;
 
 // Struct to hold a command and optional card data
 typedef struct {
+    int ID; // player ID
     CommandType command;  // Command type
     int betAmount;      // Bet amount (optional)
     Card_struct card;     // Card (optional)
