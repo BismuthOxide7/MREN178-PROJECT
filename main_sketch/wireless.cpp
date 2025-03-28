@@ -7,6 +7,9 @@
 #include "display.h"
 #include <Arduino.h>
 
+// Declare gameDeck as an external variable
+extern Deck_struct gameDeck;
+
 #define tx 12
 #define rx 11
 
@@ -39,7 +42,7 @@ int initalise_transciever() {
 // Function to send a command packet
 void hc12_send(CommandPacket packet) {
     // Message order: <ID, CMD, BET, (SUIT, VALUE, FRIENDLYNAME)>
-    String message = '<' + String(packet.ID) + "," + String(packet.command) + "," + String(packet.betAmount) + "," + '(' + String(packet.card.suit) + ',' 
+    String message = '<' + String(packet.playerID) + "," + String(packet.command) + "," + String(packet.betAmount) + "," + '(' + String(packet.card.suit) + ',' 
     + String(packet.card.value) + ',' + String(packet.card.friendlyName) + ')' + '>';    
     //Serial.println("sent: " + message);
     // Send the string via HC12
@@ -56,7 +59,7 @@ void hc12_init() {
 // Function to send a card to a player
 void hc12_send_card(byte playerID, Card_struct card) {
     CommandPacket packet;
-    packet.ID = playerID;
+    packet.playerID = playerID;
     packet.command = CMD_RECEIVE_THIS_CARD;
     packet.card = card;
     packet.betAmount = 0;
@@ -66,7 +69,7 @@ void hc12_send_card(byte playerID, Card_struct card) {
 // Function to send turn information to a player
 void hc12_send_turn(byte playerID) {
     CommandPacket packet;
-    packet.ID = playerID;
+    packet.playerID = playerID;
     packet.command = CMD_PLAYER_TURN;
     packet.betAmount = 0;
     packet.card = make_card('0', 0, '0');  // Dummy card
@@ -130,52 +133,47 @@ CommandPacket hc12_receive(void) {
 
 // Function to handle received commands
 extern void processCommand(CommandPacket packet) {
-    switch (packet.command) { // switch case through the commands enum
+    switch (packet.command) {
         case CMD_PING:
-            Serial.println("Received: PING"); // debug print
-            //return an ACK
-            if(packet.ID == PLAYER_ID){
-                HC12.print("<0,1,0,(0,0,0)>"); //Send back to 0 all players
+            Serial.println("Received: PING");
+            if (packet.playerID == deviceID) {
+                HC12.print("<0,1,0,(0,0,0)>");  // Send back to all players
             }
             break;
         case CMD_ACK:
-            Serial.println("Received: ACK");// debug print
-            if(PLAYER_ID == 0){
+            Serial.println("Received: ACK");
+            if (deviceID == 0) {
                 hasAcknowledged = true;
-                temp_ID = packet.ID;
+                temp_ID = packet.playerID;
             }
             break;
         case CMD_RECEIVE_THIS_CARD:
             Serial.println("Processing RECEIVE_CARD command...");
             // Extract player ID and card details from the packet
-            int playerID = packet.ID;  // Player number
-            Card_struct receivedCard;
-            receivedCard.friendlyName = packet.card.friendlyName;  // Card rank (e.g., 2-10, J, Q, K, A)
-            receivedCard.suit = packet.card.suit;  // Card suit (e.g., Hearts, Diamonds, etc.)
-            receivedCard.value = packet.card.value; // Card value (e.g., 10 for face cards, 11 for Ace)
+            Card_struct receivedCard = packet.card;
 
-        // Add the card to the player's hand
-            //NEED FUNCTION
+            // Add the card to the player's hand
+            add_player_card(&receivedCard);
             break;
         case CMD_HIT:
             Serial.println("Processing HIT command...");
-            hit(&playerQueue[packet.ID]);  // Call the hit function for the player
+            hit(players[packet.playerID], &gameDeck);  // Use the external gameDeck
             break;
         case CMD_STAY:
             Serial.println("Processing STAY command...");
-            stand(&playerQueue[packet.ID]);  // Call the stand function for the player
+            stand(players[packet.playerID]);
             break;
         case CMD_FOLD:
             Serial.println("Processing FOLD command...");
-            fold(&playerQueue[packet.ID]);  // Call the fold function for the player
+            fold(players[packet.playerID]);
             break;
         case CMD_BET:
             Serial.println("Processing BET command...");
-            initialBet(&playerQueue[packet.ID]);  // Call the initialBet function for the player
+            players[packet.playerID]->totalBet += packet.betAmount;
             break;
         case CMD_DOUBLE_DOWN:
             Serial.println("Processing DOUBLE DOWN command...");
-            doubleDown(&playerQueue[packet.ID]);  // Call the doubleDown function for the player
+            doubleDown(players[packet.playerID]);
             break;
         default:
             Serial.println("Unknown command received.");

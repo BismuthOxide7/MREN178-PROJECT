@@ -1,11 +1,11 @@
-#ifndef _actions_h
-#define _actions_h
+#ifndef _ACTIONS_H
+#define _ACTIONS_H
 
 #include "cards.h"
 #include <Arduino.h>
 
 typedef struct player {
-    int playerNumber;
+    uint8_t playerNumber;  // Changed to uint8_t for consistency
     int totalMoney;
     int totalSum;          
     struct Node* head;  // Hand of cards
@@ -15,16 +15,16 @@ typedef struct player {
     unsigned long timeout;
 } player;
 
-// Add these declarations
-extern player* players[4];  // Array of all players
-extern byte currentPlayerIndex;
+// Global player array declaration
+extern player* players[4];
+extern uint8_t currentPlayer;
 
 // Function prototypes
-void hit(player *currPlay, Deck_struct *deck);
-void stand(player *currPlay);
-void fold(player *currPlay);
-int initialBet(player *currPlay);
-int doubleDown(player *currPlay);
+void hit(player* currPlay, Deck_struct* deck);
+void stand(player* currPlay);
+void fold(player* currPlay);
+int initialBet(player* currPlay);
+int doubleDown(player* currPlay);
 void cleanup_player(player* p);
 
 #endif

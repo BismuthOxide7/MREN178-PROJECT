@@ -1,11 +1,14 @@
 #include "cards.h"
 #include "actions.h"
+#include "wireless.h"
 #include <Arduino.h>  // Include Arduino-specific functions
 #include <stdlib.h>
 
 // Global variables
 int tokens = 100;  // Default starting tokens for players
 int numPlayers = 4;
+player* players[4] = {NULL, NULL, NULL, NULL};
+uint8_t currentPlayer = 0;
 
 // Function to initialize players based on availability
 int startUp(bool p2, bool p3, bool p4) {
@@ -27,7 +30,7 @@ void hit(player *currPlay, Deck_struct *deck) {
     Card_struct newCard = draw_card(deck);
 
     // Create a new node for the linked list
-    struct Node* newNode = (struct Node*)malloc(sizeof(struct Node));
+    Node* newNode = (Node*)malloc(sizeof(Node));
     newNode->card = newCard;
     newNode->next = NULL;
 
@@ -35,7 +38,7 @@ void hit(player *currPlay, Deck_struct *deck) {
     if (currPlay->head == NULL) {
         currPlay->head = newNode;  // First card in the hand
     } else {
-        struct Node* traverse = currPlay->head;
+        Node* traverse = currPlay->head;
         while (traverse->next != NULL) {
             traverse = traverse->next;
         }

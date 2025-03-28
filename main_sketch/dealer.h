@@ -5,27 +5,19 @@
 #include "cards.h"
 #include "wireless.h"
 #include "display.h"
+#include "actions.h"
 
 typedef enum {
-    GAME_WAITING,    // Changed from WAITING_FOR_PLAYERS
-    GAME_DEALING,    // Changed from DEALING_CARDS
-    GAME_PLAYING,    // Changed from GAMEPLAY
-    GAME_ENDING      // Changed from GAME_END
+    GAME_WAITING,
+    GAME_DEALING,
+    GAME_PLAYING,
+    GAME_ENDING
 } GameState;
-
-// Player status structure
-typedef struct {
-    uint8_t deviceID;        // Changed from playerID
-    bool isActive;
-    int totalBet;
-    bool hasResponded;
-    unsigned long timeout;
-} PlayerStatus;
 
 // External declarations
 extern GameState gameState;
-extern PlayerStatus playerStatus[4];  // Changed from playerQueue
-extern uint8_t currentPlayer;         // Changed from currentPlayerIndex
+extern player* players[4];  // Use the player struct from actions.h
+extern uint8_t currentPlayer;
 
 // Function prototypes
 void dealer_init(void);
