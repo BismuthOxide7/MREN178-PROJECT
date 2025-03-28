@@ -1,7 +1,11 @@
-#include <Arduino.h>
+#include <SoftwareSerial.h>
+#include "wireless.h"
 #include "cards.h"
-#include "display.h"
+#include "actions.h"
+#include "buttons.h"
 #include <LiquidCrystal.h>
+#include "display.h"
+#include <Arduino.h>
 
 // Initialize the library by associating any needed LCD interface pin
 // with the Arduino pin number it is connected to
