@@ -1,8 +1,11 @@
+#include <SoftwareSerial.h>
 #include "wireless.h"
 #include "cards.h"
 #include "actions.h"
 #include "buttons.h"
 #include <LiquidCrystal.h>
+#include "display.h"
+#include <Arduino.h>
 
 // Declare global variables
 int menuIndex = 0;  // Initialize menuIndex
