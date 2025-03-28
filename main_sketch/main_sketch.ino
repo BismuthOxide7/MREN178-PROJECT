@@ -6,70 +6,42 @@
 #include "display.h"
 #include "dealer.h"
 #include <EEPROM.h>
+#include "wireless.h"
 
-// Global variables
-uint8_t deviceID;  // Global device ID
-bool isDealer = false;
-player* players[4] = {NULL, NULL, NULL, NULL};
-byte currentPlayerIndex = 0;
+
+int ID;
+//global variables
+
+int currTurn = 0;  //index of current player- ease of print later on
+player* circleQueueHead; //points to the current player
+
 
 void setup() {
-    Serial.begin(9600);
-    randomSeed(analogRead(0));  // Initialize random seed
-    
-    // Read device ID from EEPROM
-    deviceID = EEPROM.read(0);
-    isDealer = (deviceID == 0);
-    
-    // Initialize HC-12
-    hc12_init();
-    
-    // Initialize LCD and buttons
-    lcd.begin(16, 2);
-    setupButtons();
-    
-    // Initialize players
-    for (int i = 0; i < 4; i++) {
-        players[i] = (player*)malloc(sizeof(player));
-        players[i]->playerNumber = i;
-        players[i]->totalMoney = 100;  // Starting money
-        players[i]->totalSum = 0;
-        players[i]->head = NULL;
-        players[i]->outOfGame = false;
-        players[i]->totalBet = 0;
-        players[i]->hasResponded = false;
-        players[i]->timeout = 0;
-    }
-    
-    // Initialize dealer if applicable
-    if (isDealer) {
-        dealer_init();
-    }
-    
-    // Clear display for new game
-    new_game();
+  EEPROM.get(0, ID); // Read the ID from EEPROM
+
+  Serial.begin(9600); // Serial port to computer
+  numPlayers = actions.startUp(/*BENS SIGNALS*/)/////////////////////////////////////////////////////////////////////
+  player *playerQueue[numPlayers]; 
+  for (int i = 0; i < numPlayers; i++) {
+    playerQueue[i] = (player *)malloc(sizeof(player)); //setting up the hand for each- allocating mem
+    actions.hit(playerQueue[i]); //first starting card
+    actions.hit(playerQueue[i]); //second starting card
+    playerQueue[i]->playerNumber = i+1;
+  }
+  circleQueueHead = playerQueue[0]; //starting with the first player
 }
 
 void loop() {
-    // Check buttons for player input
-    checkButtons();
-    
-    // Handle incoming messages
-    if (HC12.available()) {
-        CommandPacket packet = hc12_receive();
-        
-        if (packet.command != CMD_NONE) {  // Valid packet received
-            if (isDealer) {
-                dealer_handle_command(packet);
-            }
-            if (packet.playerID == deviceID || packet.playerID == 255) {  // 255 for broadcast
-                processCommand(packet);
-            }
-        }
-    }
-    
-    // Run dealer background tasks if applicable
-    if (isDealer) {
-        dealer_background_task();
-    }
+ if( circleQueueHead->outOfGame == false){
+  //talk to erin and yasmine
+ }
+
+ if(*circleQueueHead == playerQueue[numPlayers -1]) //chaning turn (typo but im pissed off at the curser)
+ {
+  circleQueueHead = playerQueue[0];
+  currPlayer = 1;
+ }
+ else{
+  circleQueueHead = playerQueue[currPlayers]; //currplayer is always one higher to account for the 0th spot in the array, so this increases the turn by 1
+  currPlayer++;
 }
