@@ -26,7 +26,7 @@ void setup() {
   numPlayers = startUp(players);  // Initialize players and get the count
   for (int i = 0; i < numPlayers; i++) {
     playerQueue[i] = (player*)malloc(sizeof(player));  // Allocate memory for each player
-    actions.hit(playerQueue[i]);  // First starting card
+    actions.hit(playerQueue[i], &deck);  // Pass the deck to the hit function
     actions.hit(playerQueue[i]);  // Second starting card
     playerQueue[i]->playerNumber = i + 1;
   }
@@ -53,20 +53,20 @@ void loop() {
         actions.hit(circleQueueHead);
         break;
       case 1:  // Stand
-        actions.stand(*circleQueueHead);
+        actions.stand(circleQueueHead);
         break;
       case 2:  // Fold
-        actions.fold(*circleQueueHead);
+        actions.fold(circleQueueHead);
         break;
       case 3:  // Double Down
-        actions.doubleDown(*circleQueueHead);
+        actions.doubleDown(circleQueueHead);
         break;
       default:
         break;
     }
 
     // Update the display
-    update_LCD();
+    //update_LCD();
   }
 
   // Move to the next player in the circular queue

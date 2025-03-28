@@ -1,6 +1,6 @@
 #include "cards.h"
 #include "actions.h"
-#include <stdio.h>
+#include <Arduino.h>  // Include Arduino-specific functions
 #include <stdlib.h>
 
 // Global variables
@@ -22,23 +22,30 @@ int startUp(bool p2, bool p3, bool p4) {
 }
 
 // Function to handle "hit" action
-void hit(player *currPlay) {
-    Card_struct *newCard = (Card_struct *)malloc(sizeof(Card_struct));
-    *newCard = draw_card();  // Draw a card from the deck
-    newCard->next = NULL;
+void hit(player *currPlay, Deck_struct *deck) {
+    // Draw a card from the deck
+    Card_struct newCard = draw_card(deck);
 
+    // Create a new node for the linked list
+    struct Node* newNode = (struct Node*)malloc(sizeof(struct Node));
+    newNode->card = newCard;
+    newNode->next = NULL;
+
+    // Add the new node to the player's hand
     if (currPlay->head == NULL) {
-        currPlay->head = newCard;  // First card in the hand
+        currPlay->head = newNode;  // First card in the hand
     } else {
-        Card_struct *traverse = currPlay->head;
+        struct Node* traverse = currPlay->head;
         while (traverse->next != NULL) {
             traverse = traverse->next;
         }
-        traverse->next = newCard;  // Add card to the end of the hand
+        traverse->next = newNode;  // Add card to the end of the hand
     }
 
-    currPlay->totalSum += newCard->value;  // Update total sum
+    // Update the player's total sum
+    currPlay->totalSum += newCard.value;
 
+    // Check if the player is out of the game
     if (currPlay->totalSum > 21) {
         currPlay->outOfGame = true;  // Player is out of the game
         Serial.print("Player ");

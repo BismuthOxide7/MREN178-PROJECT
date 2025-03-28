@@ -6,15 +6,18 @@
 
 typedef struct {
     int playerNumber;
-    int totalMoney = 100;
-    int totalSum = 100;          
-    *Card_struct head;
-    *Card_struct next;
-    bool outOfGame = false;
-    int totalBet = 0;
-  } player;
+    int totalMoney;
+    int totalSum;          
+    struct Node* head;  // Use Node* for linked list
+    bool outOfGame;
+    int totalBet;
+} player;
 
-  //function prototypes
-  makePlayer(int number, *Card_struct heads)
+// Function prototypes
+void hit(player *currPlay, Deck_struct *deck);
+void stand(player *currPlay);
+void fold(player *currPlay);
+int initialBet(player *currPlay);
+int doubleDown(player *currPlay);
 
 #endif

@@ -4,7 +4,8 @@
 #include <SoftwareSerial.h>
 #include "actions.h"
 
-#define rx = 11, tx = 12
+#define tx 12
+#define rx 11
 
 #define BAUDRATE 9600 // Globally delcared baud rate
 
