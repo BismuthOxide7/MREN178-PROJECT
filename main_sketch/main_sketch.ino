@@ -28,8 +28,8 @@ void setup() {
   numPlayers = startUp(players);  // Initialize players and get the count
   for (int i = 0; i < numPlayers; i++) {
     playerQueue[i] = (player*)malloc(sizeof(player));  // Allocate memory for each player
-    actions.hit(playerQueue[i], &deck);  // Pass the deck to the hit function
-    actions.hit(playerQueue[i]);  // Second starting card
+    hit(playerQueue[i],  );  // Pass the deck to the hit function
+    hit(playerQueue[i]);  // Second starting card
     playerQueue[i]->playerNumber = i + 1;
   }
   circleQueueHead = playerQueue[0];  // Start with the first player

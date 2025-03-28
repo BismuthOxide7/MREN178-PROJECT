@@ -96,7 +96,7 @@ void processCommand(CommandPacket packet) {
             break;
         case CMD_ACK:
             Serial.println("Received: ACK");// debug print
-            if(ID == 0){
+            if(PLAYER_ID == 0){
                 hasAcknowledged = true;
                 temp_ID = packet.ID;
             }
@@ -111,7 +111,7 @@ void processCommand(CommandPacket packet) {
             receivedCard.value = packet.card.value; // Card value (e.g., 10 for face cards, 11 for Ace)
 
         // Add the card to the player's hand
-            addCardToHand(&playerQueue[playerID], receivedCard);
+            //NEED FUNCTION
             break;
         case CMD_HIT:
             Serial.println("Processing HIT command...");
@@ -140,7 +140,7 @@ void processCommand(CommandPacket packet) {
 }
 
 // Function to get the number of players available
-bool getPlayersAvailable(bool *players) {
+bool getPlayersAvailable(bool* players) {
     // Get the number of players available
     // For now, we will assume that there are 3 players
     //check all players availability - slight delay between each response to avoid collision
@@ -154,7 +154,7 @@ bool getPlayersAvailable(bool *players) {
             delay(100);
             if(hasAcknowledged){
                 hasAcknowledged = false;
-                *players[temp_ID] = true;
+                players[temp_ID] = true;
                 break;
             }
         }
