@@ -3,19 +3,11 @@
 
 #include <Arduino.h>
 #include "cards.h"
-#include <LiquidCrystal.h>
 
-// External declarations
-extern LiquidCrystal lcd;
-extern Card_struct hidden_dealer_card;
-extern Node* player_cards;
-extern Node* dealer_cards;
+// Function prototypes 
+int add_player_card(Card_struct &card); // Display draws card from the deck
+int add_hidden_dealer_card(Card_struct &card); // Displayed dealers hidden card
+int add_visable_dealer_card(Card_struct &card); // Displayed dealer card
+int new_game (); // Display cards cleared and ready for new game  
 
-// Function prototypes
-int add_player_card(Card_struct* card);
-int add_hidden_dealer_card(Card_struct* card);
-int add_visible_dealer_card(Card_struct* card);
-int new_game(void);
-void update_LCD(void);
-
-#endif
+#endif 
