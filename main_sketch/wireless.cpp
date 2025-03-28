@@ -23,6 +23,11 @@ int test_fun() {
     return 178;
 }
 
+bool startUp(int playerNumber){
+    //ping player and wait for ack response
+    return false;
+}
+
 // Function to initialize the transceiver
 int initalise_transciever() {
     HC12.begin(BAUDRATE);  // Start communication

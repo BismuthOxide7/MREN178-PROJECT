@@ -15,6 +15,7 @@ typedef struct {
   } player;
 
   //function prototypes
+  
   makePlayer(int number, *Card_struct heads)
 
 #endif
