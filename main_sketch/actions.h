@@ -1,30 +1,20 @@
-#ifndef _ACTIONS_H
-#define _ACTIONS_H
+#ifndef _actions_h
+#define _actions_h
 
 #include "cards.h"
 #include <Arduino.h>
 
-typedef struct player {
-    uint8_t playerNumber;  // Changed to uint8_t for consistency
-    int totalMoney;
-    int totalSum;          
-    struct Node* head;  // Hand of cards
-    bool outOfGame;
-    int totalBet;
-    bool hasResponded;
-    unsigned long timeout;
-} player;
+typedef struct {
+    int playerNumber;
+    int totalMoney = 100;
+    int totalSum = 100;          
+    *Card_struct head;
+    *Card_struct next;
+    bool outOfGame = false;
+    int totalBet = 0;
+  } player;
 
-// Global player array declaration
-extern player* players[4];
-extern uint8_t currentPlayer;
-
-// Function prototypes
-void hit(player* currPlay, Deck_struct* deck);
-void stand(player* currPlay);
-void fold(player* currPlay);
-int initialBet(player* currPlay);
-int doubleDown(player* currPlay);
-void cleanup_player(player* p);
+  //function prototypes
+  makePlayer(int number, *Card_struct heads)
 
 #endif
