@@ -1,8 +1,11 @@
-#include <Arduino.h>
+#include <SoftwareSerial.h>
 #include "wireless.h"
 #include "cards.h"
-#include <SoftwareSerial.h>
 #include "actions.h"
+#include "buttons.h"
+#include <LiquidCrystal.h>
+#include "display.h"
+#include <Arduino.h>
 
 #define tx 12
 #define rx 11
