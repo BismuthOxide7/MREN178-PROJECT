@@ -1,8 +1,11 @@
+#include <SoftwareSerial.h>
 #include "wireless.h"
 #include "cards.h"
 #include "actions.h"
-#include "display.h"
 #include "buttons.h"
+#include <LiquidCrystal.h>
+#include "display.h"
+#include <Arduino.h>
 #include <EEPROM.h>
 
 // Global variables
