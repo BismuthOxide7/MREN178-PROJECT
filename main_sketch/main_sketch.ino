@@ -3,79 +3,73 @@
 #include "cards.h"
 #include "actions.h"
 #include "buttons.h"
-#include <LiquidCrystal.h>
 #include "display.h"
-#include <Arduino.h>
+#include "dealer.h"
 #include <EEPROM.h>
 
 // Global variables
-int currTurn = 0;  // Index of the current player
-player* playerQueue[4];  // Circular queue for players
-int numPlayers = 4;  // Total number of players
-player* circleQueueHead;  // Points to the current player
+uint8_t deviceID;  // Global device ID
+bool isDealer = false;
+player* players[4] = {NULL, NULL, NULL, NULL};
+byte currentPlayerIndex = 0;
 
 void setup() {
-  // Initialize ID from EEPROM
-  EEPROM.get(0, PLAYER_ID);
-
-  Serial.begin(9600);  // Serial port to computer
-
-  // Initialize wireless communication
-  bool players[3] = {false, false, false};  // Array to track active players
-  getPlayersAvailable(players);  // Get the number of players available
-
-  // Initialize players
-  numPlayers = startUp(players);  // Initialize players and get the count
-  for (int i = 0; i < numPlayers; i++) {
-    playerQueue[i] = (player*)malloc(sizeof(player));  // Allocate memory for each player
-    hit(playerQueue[i],  );  // Pass the deck to the hit function
-    hit(playerQueue[i]);  // Second starting card
-    playerQueue[i]->playerNumber = i + 1;
-  }
-  circleQueueHead = playerQueue[0];  // Start with the first player
-
-  // Initialize display
-  new_game();  // Clear the display for a new game
+    Serial.begin(9600);
+    randomSeed(analogRead(0));  // Initialize random seed
+    
+    // Read device ID from EEPROM
+    deviceID = EEPROM.read(0);
+    isDealer = (deviceID == 0);
+    
+    // Initialize HC-12
+    hc12_init();
+    
+    // Initialize LCD and buttons
+    lcd.begin(16, 2);
+    setupButtons();
+    
+    // Initialize players
+    for (int i = 0; i < 4; i++) {
+        players[i] = (player*)malloc(sizeof(player));
+        players[i]->playerNumber = i;
+        players[i]->totalMoney = 100;  // Starting money
+        players[i]->totalSum = 0;
+        players[i]->head = NULL;
+        players[i]->outOfGame = false;
+        players[i]->totalBet = 0;
+        players[i]->hasResponded = false;
+        players[i]->timeout = 0;
+    }
+    
+    // Initialize dealer if applicable
+    if (isDealer) {
+        dealer_init();
+    }
+    
+    // Clear display for new game
+    new_game();
 }
 
 void loop() {
-  // Check if the current player is still in the game
-  if (!circleQueueHead->outOfGame) {
-    // Display the current player's turn
-    Serial.print("Player ");
-    Serial.print(circleQueueHead->playerNumber);
-    Serial.println("'s turn!");
-
-    // Check buttons for player action
+    // Check buttons for player input
     checkButtons();
-
-    // Perform action based on button press
-    switch (menuIndex) {
-      case 0:  // Hit
-        actions.hit(circleQueueHead);
-        break;
-      case 1:  // Stand
-        actions.stand(circleQueueHead);
-        break;
-      case 2:  // Fold
-        actions.fold(circleQueueHead);
-        break;
-      case 3:  // Double Down
-        actions.doubleDown(circleQueueHead);
-        break;
-      default:
-        break;
+    
+    // Handle incoming messages
+    if (HC12.available()) {
+        CommandPacket packet = hc12_receive();
+        
+        if (packet.command != CMD_NONE) {  // Valid packet received
+            if (isDealer) {
+                dealer_handle_command(packet);
+            }
+            if (packet.playerID == deviceID || packet.playerID == 255) {  // 255 for broadcast
+                processCommand(packet);
+            }
+        }
     }
-
-    // Update the display
-    //update_LCD();
-  }
-
-  // Move to the next player in the circular queue
-  if (circleQueueHead == playerQueue[numPlayers - 1]) {
-    circleQueueHead = playerQueue[0];
-    currTurn = 0;
-  } else {
-    circleQueueHead = playerQueue[++currTurn];
-  }
+    
+    // Run dealer background tasks if applicable
+    if (isDealer) {
+        dealer_background_task();
+    }
 }

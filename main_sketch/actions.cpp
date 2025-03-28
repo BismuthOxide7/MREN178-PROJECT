@@ -102,3 +102,18 @@ int doubleDown(player *currPlay) {
         return -1;
     }
 }
+
+// Add to actions.cpp
+void cleanup_player(player* p) {
+    if (p == NULL) return;
+    
+    // Clean up card linked list
+    Node* current = p->head;
+    while (current != NULL) {
+        Node* next = current->next;
+        free(current);
+        current = next;
+    }
+    
+    free(p);
+}

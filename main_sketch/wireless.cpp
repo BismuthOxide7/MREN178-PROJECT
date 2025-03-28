@@ -46,46 +46,90 @@ void hc12_send(CommandPacket packet) {
     HC12.print(message);
 }
 
+// Function to initialize HC-12
+void hc12_init() {
+    HC12.begin(BAUDRATE);
+    delay(100);
+    Serial.println("HC-12 Initialized");
+}
 
+// Function to send a card to a player
+void hc12_send_card(byte playerID, Card_struct card) {
+    CommandPacket packet;
+    packet.ID = playerID;
+    packet.command = CMD_RECEIVE_THIS_CARD;
+    packet.card = card;
+    packet.betAmount = 0;
+    hc12_send(packet);
+}
+
+// Function to send turn information to a player
+void hc12_send_turn(byte playerID) {
+    CommandPacket packet;
+    packet.ID = playerID;
+    packet.command = CMD_PLAYER_TURN;
+    packet.betAmount = 0;
+    packet.card = make_card('0', 0, '0');  // Dummy card
+    hc12_send(packet);
+}
 
 // Function to receive a command packet
-void hc12_receive() {
+CommandPacket hc12_receive(void) {
+    CommandPacket packet = {0};  // Initialize empty packet
     String data = "";
-  
-    // If HC-12 has data, read it until '>'
-    if (HC12.peek() == '<') {
-        while (HC12.available()) {        
-            char receivedChar = (char)HC12.read();
-            data += receivedChar;
-            if (receivedChar == '>'){
-              //DEBUG Serial.println("rcv: " + data);
-              break;  // Stop reading when '>' is found
-            }
+    
+    if (HC12.peek() != '<') {
+        while(HC12.available() && HC12.peek() != '<') {
+            HC12.read();  // Discard until start marker
         }
-    } else {
-      while(HC12.peek() != '<') Serial.print(HC12.read()); // consume char
+        return packet;
     }
 
-    CommandPacket packet; // Create a new packet
-    packet.ID = data.substring(1, data.indexOf(",")).toInt(); // Extract ID
-    data = data.substring(data.indexOf(",") + 1); // Remove ID from string
-    packet.command = (CommandType)data.substring(0, data.indexOf(",")).toInt(); // Extract command
-    data = data.substring(data.indexOf(",") + 1); // Remove command from string
-    packet.betAmount = data.substring(0, data.indexOf(",")).toInt(); // Extract bet amount
-    data = data.substring(data.indexOf("(") + 1); // Remove bet amount from string
-    packet.card.suit = data.substring(0, data.indexOf(",")).charAt(0); // Extract suit
-    data = data.substring(data.indexOf(",") + 1); // Remove suit from string
-    packet.card.value = data.substring(0, data.indexOf(",")).toInt(); // Extract value
-    data = data.substring(data.indexOf(",") + 1); // Remove value from string
-    packet.card.friendlyName = data.substring(0, data.indexOf(",")).charAt(0); // Extract friendly name
+    // Read until end marker
+    while (HC12.available()) {        
+        char c = (char)HC12.read();
+        if (c == '>') break;
+        data += c;
+    }
+
+    if (data.length() < 5) return packet;  // Invalid packet
+
+    // Parse packet
+    data = data.substring(1);  // Remove '<'
+    packet.playerID = data.substring(0, data.indexOf(",")).toInt();
+    data = data.substring(data.indexOf(",") + 1);
+    packet.command = (CommandType)data.substring(0, data.indexOf(",")).toInt();
+    data = data.substring(data.indexOf(",") + 1);
+    packet.betAmount = data.substring(0, data.indexOf(",")).toInt();
+    
+    // Parse card data
+    int cardStart = data.indexOf("(") + 1;
+    if (cardStart > 0) {
+        String cardData = data.substring(cardStart, data.indexOf(")"));
+        String cardParts[3];
+        int idx = 0;
+        int lastComma = -1;
         
-    // Process command or do something with the packet here
-    processCommand(packet);
-    return;
+        for (int i = 0; i < cardData.length() && idx < 3; i++) {
+            if (cardData[i] == ',') {
+                cardParts[idx++] = cardData.substring(lastComma + 1, i);
+                lastComma = i;
+            }
+        }
+        if (idx == 2) {
+            cardParts[2] = cardData.substring(lastComma + 1);
+        }
+
+        packet.card.suit = cardParts[0][0];
+        packet.card.value = cardParts[1].toInt();
+        packet.card.friendlyName = cardParts[2][0];
+    }
+
+    return packet;
 }
 
 // Function to handle received commands
-void processCommand(CommandPacket packet) {
+extern void processCommand(CommandPacket packet) {
     switch (packet.command) { // switch case through the commands enum
         case CMD_PING:
             Serial.println("Received: PING"); // debug print
