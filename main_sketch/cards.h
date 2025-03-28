@@ -16,11 +16,6 @@ typedef struct {
   int top_card;           // Index of the top card in the stack (starts at 51 for a full deck)
 } Deck_struct;
 
-typedef struct {
-  Card_struct card;
-  Card_struct *nextCard; // Pointer to the next card in the hand
-} Hand_struct;
-
 // Function prototypes
 Card_struct make_card(char suit, int value, char friendlyName);  // Create a card
 void initialize_deck(Deck_struct &deck);  // Initialize deck with 52 cards
