@@ -10,12 +10,6 @@ typedef struct {
   char friendlyName;  // 'A' for Ace, '2'-'9', 'T' for 10, 'J' for Jack, 'Q' for Queen, 'K' for King
 } Card_struct;
 
-// Node struct for linked lists
-typedef struct Node {
-  struct Node* next;
-  Card_struct card;
-} Node;
-
 // Deck struct (Stack Implementation)
 typedef struct {
   Card_struct cards[52];  // Array to hold 52 cards
@@ -24,8 +18,8 @@ typedef struct {
 
 // Function prototypes
 Card_struct make_card(char suit, int value, char friendlyName);  // Create a card
-void initialize_deck(Deck_struct *deck);  // Initialize deck with 52 cards
-Card_struct draw_card(Deck_struct *deck);  // Draw a card from the deck
-void shuffle_deck(Deck_struct *deck);  // Shuffle the deck using Fisher-Yates algorithm
+void initialize_deck(Deck_struct &deck);  // Initialize deck with 52 cards
+Card_struct draw_card(Deck_struct &deck);  // Draw a card from the deck
+void shuffle_deck(Deck_struct &deck);  // Shuffle the deck using Fisher-Yates algorithm
 
 #endif
