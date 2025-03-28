@@ -6,7 +6,6 @@
 #include <EEPROM.h>
 
 // Global variables
-int ID;
 int currTurn = 0;  // Index of the current player
 player* playerQueue[4];  // Circular queue for players
 int numPlayers = 4;  // Total number of players
@@ -14,7 +13,7 @@ player* circleQueueHead;  // Points to the current player
 
 void setup() {
   // Initialize ID from EEPROM
-  EEPROM.get(0, ID);
+  EEPROM.get(0, PLAYER_ID);
 
   Serial.begin(9600);  // Serial port to computer
 

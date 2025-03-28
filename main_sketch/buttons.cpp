@@ -29,23 +29,23 @@ void checkButtons() {
         switch (menuIndex) {
             case 0:  // Hit
                 Serial.println("Player chose HIT!");
-                hc12_send(CMD_HIT);
+                //hc12_send(CMD_HIT);
                 break;
             case 1:  // Stay
                 Serial.println("Player chose STAY!");
-                hc12_send(CMD_STAY);
+                //hc12_send(CMD_STAY);
                 break;
             case 2:  // Fold
                 Serial.println("Player chose FOLD!");
-                hc12_send(CMD_FOLD);
+                //hc12_send(CMD_FOLD);
                 break;
             case 3:  // Bet
                 Serial.println("Player chose BET!");
-                hc12_send(CMD_BET);
+                //hc12_send(CMD_BET);
                 break;
             case 4:  // View Hand
                 Serial.println("Player chose VIEW HAND!");
-                hc12_send(CMD_RECEIVE_THIS_CARD);
+                //hc12_send(CMD_RECEIVE_THIS_CARD);
                 break;
         }
 

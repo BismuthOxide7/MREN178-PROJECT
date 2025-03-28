@@ -5,6 +5,8 @@
 #include <stdint.h>
 #include "cards.h"
 
+extern int PLAYER_ID;  // Player ID (0-3) to be set by eeprom read in main_sketch.ino
+
 // Define available commands
 typedef enum {
     CMD_NONE = 0,           // Default / No command

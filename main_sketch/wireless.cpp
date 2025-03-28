@@ -87,7 +87,7 @@ void processCommand(CommandPacket packet) {
         case CMD_PING:
             Serial.println("Received: PING"); // debug print
             //return an ACK
-            if(packet.ID == ID){
+            if(packet.ID == PLAYER_ID){
                 HC12.print("<0,1,0,(0,0,0)>"); //Send back to 0 all players
             }
             break;
