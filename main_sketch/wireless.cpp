@@ -25,6 +25,26 @@ int test_fun() {
 
 bool startUp(int playerNumber){
     //ping player and wait for ack response
+    CommandPacket packet;
+    packet.command = CMD_PING; // Set command to PING
+    packet.ID = playerNumber; // Set ID to player number
+    packet.betAmount = 0; // Set bet amount to 0
+    packet.card.suit = 'X'; // Set suit to 'X'
+    packet.card.value = -1; // Set value to -1
+    packet.card.friendlyName = 'X'; // Set friendly name to 'X'
+    hc12_send(packet); // Send the packet
+    delay(2000); // Wait for a response
+    // Check for a response from the other player
+    if (HC12.available()) {
+        CommandPacket rec_pckt = hc12_receive(1); // Receive the packet in mode 1 (returns the packet)
+        if(rec_pckt.command == CMD_ACK) { // Check if the received command is ACK
+            Serial.println("ACK received"); // Print debug message
+            return true; // Return success
+        } 
+        else return false; // Return failure if not ACK
+ 
+        }
+
     return false;
 }
 
@@ -50,7 +70,7 @@ void hc12_send(CommandPacket packet) {
 
 
 // Function to receive a command packet
-void hc12_receive() {
+CommandPacket hc12_receive(int mode = 0) {
     String data = "";
   
     // If HC-12 has data, read it until '>'
@@ -81,8 +101,9 @@ void hc12_receive() {
     packet.card.friendlyName = data.substring(0, data.indexOf(",")).charAt(0); // Extract friendly name
         
     // Process command or do something with the packet here
-    processCommand(packet);
-    return;
+    if (mode = 0) processCommand(packet);
+    if (mode = 1) return packet;
+    return -1;
 }
 
 // Function to handle received commands
