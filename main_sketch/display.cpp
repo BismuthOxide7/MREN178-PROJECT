@@ -26,6 +26,7 @@ LiquidCrystal lcd(pin_RS,  pin_EN,  pin_d4,  pin_d5,  pin_d6,  pin_d7);
 struct Card_struct hidden_dealer_card;
 struct Card_struct* player_cards = NULL;
 struct Card_struct* dealer_cards = NULL;
+int is_hidden = 1;
 
 // Struct to define linked list for added player cards and added visable dealer cards with two different heads 
 struct Node {
@@ -50,14 +51,19 @@ void update_LCD(){
     transverser = transverser.next;
   }
   lcd.setCursor(1,0);
-  // TODO; need to replace with if statement with a flag to check if the hidden card needs to be flipped over 
-  lcd.print ("H"); //printing hidden card - later needs to be shown 
+  // check if the hidden card needs to be flipped over 
+  if(is_hidden == 1){
+    lcd.print ("H"); //printing hidden card - later needs to be shown 
+  }
+  else{
+    lcd.print(hidden_dealer_card.friendlyName)
+  }
   lcd.setCursor(1,1);
   transverser = dealer_cards;
   while(transverser != NULL){
     lcd.print(transverser -> card.friendlyName);
     transverser = transverser.next;
-  } 
+  }
 }
 
 // Function implimentations player cards linked list 
