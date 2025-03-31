@@ -4,7 +4,7 @@
 #include "cards.h"
 #include "actions.h"
 
-void hit(Player *currPlay) 
+void hit(player *currPlay) 
 {
     Card_Struct *newCard = (Card_Struct *)malloc(sizeof(Card_Struct)); // Sanity check- make sure the arduino is okay (sufficient memory cuz they're small)
     if (!newCard) {
