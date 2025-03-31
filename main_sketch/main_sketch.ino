@@ -16,9 +16,11 @@ int currTurn = 1;  // Index of current player
 player** circleQueueHead; // Points to the current player 
 player* playerQueue[4];   // Queue of all possible players
 
-EEPROM.get(0, ID); // Read the ID from EEPROM
+
+
 
 void setup() {
+  EEPROM.get(0, ID); // Read the ID from EEPROM
   Serial.begin(9600); // Serial port to computer
   if(ID == 0){
     isDealer = true;
@@ -119,7 +121,6 @@ void dealer_init_game(){
     packet.card.value = -1; // Set value to -1
     packet.card.friendlyName = 'X'; // Set friendly name to 'X'
     hc12_send(packet); // Send the packet
-    free(&packet); //free the packet memory
     delay(2000); // Wait for a response
     hc12_receive(1); //receive the packet in mode 0 to process the command
     

@@ -29,13 +29,6 @@ Card_struct* player_cards = NULL;
 Card_struct* dealer_cards = NULL;
 int is_hidden = 1;
 
-// Create node
-Node createNode(Card_struct card) {
-    Node* newNode = (Node*)malloc(sizeof(Node));
-    newNode->card = card;
-    return *newNode;
-}
-
 // Update LCD display with linked lists and hidden card 
 bool Show_Hands() {
     lcd.clear();

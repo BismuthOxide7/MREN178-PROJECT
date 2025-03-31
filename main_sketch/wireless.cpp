@@ -51,7 +51,7 @@ bool startUp(int playerNumber){
 }
 
 // Function to initialize the transceiver
-int initalise_transciever() {
+int initialise_transciever() {
     HC12.begin(BAUDRATE);  // Start communication
     delay(100); // Wait
     if(HC12.available()){
