@@ -8,35 +8,8 @@ int tokens;
 int numPlayers = 4;
 **Card_Struct p1,p2,p3,p4;
 **Card_Struct[] players = {p1,p2,p3,p4} // Setting empty array to hold poiters to each players linked list
-//*int indAdd
 
-typedef struct playerHand{
-    
-}
 
-int startUp(bool p2, bool p3, bool p4) // Dealer is assumed to be there (because has to be for functionality)
-{
-    // since players preloaded, nothing needs to be done for the dealer
-    if(p2 != true)
-    {
-        players[1] = NULL;
-        numPlayers--; // Decreasing the number of players so approppriate queue size is made
-    }
-    
-    if(p2 != true)
-    {
-        players[2] = NULL;
-        numPlayers--;
-    }
-
-    if(p2 != true)
-    {
-        players[3] = NULL;
-        numPlayers--;
-    }
-
-    return numPlayers;
-}
 
 void hit(player *currPlay) 
 {
