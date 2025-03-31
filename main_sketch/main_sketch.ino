@@ -16,7 +16,7 @@ extern player* This_Player_Struct = NULL; // Pointer to the player struct
 extern player* Dealer_Struct = NULL; // Pointer to the dealer struct
 //global variables
 
-int currTurn = 0;  //index of current player- ease of print later on
+int currTurn = 1;  //index of current player- ease of print later on
 player* circleQueueHead; //points to the current player 
 player playerQueue[4]; // making the queue of all possible players, if not there will be NULL
 
@@ -125,12 +125,31 @@ void dealer_init_game(){
     free(&packet); //free the packet memory
     delay(2000); // Wait for a response
     hc12_receive(1); //receive the packet in mode 0 to process the command
-
-
+    if(circleQueueHead = playerQueue[3])
+    {
+      circleQueueHead = playerQueue[0];
+      currTurn = 1;
+    }
+    else
+    {
+      circleQueueHead = playerQueue[currTurn];
+      currTurn++;
+      if(playerQueue[currTurn] == NULL)
+        {
+          if(circleQueueHead = playerQueue[3])
+          {
+          circleQueueHead = playerQueue[0];
+          currTurn = 1;
+          }
+          else {
+          circleQueueHead = playerQueue[currTurn];
+          currTurn++;
+        }
+      }
+    }
+    
     //Show menu on LCD
-    checkButtons(); //check for and handle button presses
-    
-    
+    checkButtons(); //check for and handle button presses    
   }
   //free memory for each player
 }
