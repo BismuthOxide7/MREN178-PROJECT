@@ -4,10 +4,10 @@
 #include "cards.h"
 #include <Arduino.h>
 
-typedef struct {
+extern typedef struct player {
     int playerNumber;
     int totalMoney = 100;
-    int totalSum = 100;          
+    int totalSum = 0;          
     *Card_struct head;
     *Card_struct next;
     bool outOfGame = false;
