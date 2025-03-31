@@ -103,7 +103,6 @@ CommandPacket hc12_receive(int mode = 0) {
     // Process command or do something with the packet here
     if (mode = 0) processCommand(packet);
     if (mode = 1) return packet;
-    return -1;
 }
 
 // Function to handle received commands
