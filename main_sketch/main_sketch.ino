@@ -107,9 +107,29 @@ void dealer_init_game(){
 
   //main gameplay loop
   while(1){
-    //check for player actions and update display
-    //check for dealer actions and update display
-    //check for game over conditions and update display
+    if(HC12.available()){
+      hc12_receive(0); //receive and process a command packet
+    }
+    //operate the queue in the background. ping a player when it is their turn
+    //PUT QUEUE FUNCTIONALITY HERE
+    //ping the player when it is their turn
+    CommandPacket packet;
+    packet.command = CMD_PING; // Set command to PING
+    packet.ID = circleQueueHead->playerNumber; // Set ID to player number
+    packet.betAmount = 0; // Set bet amount to 0
+    packet.card.suit = 'X'; // Set suit to 'X'
+    packet.card.value = -1; // Set value to -1
+    packet.card.friendlyName = 'X'; // Set friendly name to 'X'
+    hc12_send(packet); // Send the packet
+    free(&packet); //free the packet memory
+    delay(2000); // Wait for a response
+    hc12_receive(1); //receive the packet in mode 0 to process the command
+
+
+    //Show menu on LCD
+    checkButtons(); //check for and handle button presses
+    
+    
   }
   //free memory for each player
 }
