@@ -31,21 +31,21 @@ void hit(player *currPlay)
 
     if (currPlay.totalSum > 21) {
         Serial.printf("Player %d loses! Total: %d\n", currPlay.playerNumber, currPlay.totalSum);
-        currPlay.outOfGame = true;
+        currPlay.over21 = true;
     }
 }
 
 void stand(player *currPlay)
 {
     Serial.printf("Player %d stands with a total: %d\n", currPlay.playerNumber, currPlay.totalSum);
-    currPlay.outOfGame = true;
+    currPlay.stand = true;
 }
 
 void fold(player *currPlay)
 {
     currPlay.totalBet *= 0.5;
     Serial.printf("Player %d folds! Half the bet is retracted, leaving %d. Player card total: %d\n", currPlay.playerNumber, currPlay.totalBet, currPlay.totalSum);
-    currplay.outOfGame = true;
+    currplay.fold = true;
 }
 
 void initialBet(player *currPlay)
