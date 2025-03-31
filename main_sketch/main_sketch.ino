@@ -9,8 +9,11 @@
 #include "wireless.h"
 
 extern bool isDealer = false;
+extern int ID;
+EEPROM.get(0, ID); // Read the ID from EEPROM
 
-int ID;
+extern player* This_Player_Struct = NULL; // Pointer to the player struct
+extern player* Dealer_Struct = NULL; // Pointer to the dealer struct
 //global variables
 
 int currTurn = 0;  //index of current player- ease of print later on
@@ -18,23 +21,41 @@ player* circleQueueHead; //points to the current player
 
 
 void setup() {
-  EEPROM.get(0, ID); // Read the ID from EEPROM
+  
   Serial.begin(9600); // Serial port to computer
 
   if(ID == 0){
     isDealer = true;
     //DEALER ARDUINO, handles wireless transmission and deck
     dealer_init_game(); //initialize the dealer
-  }
-
-  else{
+  } else {
     //PLAYER ARDUINO, handles buttons and display
     player_init_game(); //initialize the player
   }
 }
 
 void player_init_game(){
+  //make player struct for local player
+  player* localPlayer = (player *)malloc(sizeof(player)); //allocate memory for the player
+  localPlayer->playerNumber = ID; //set the player number to the ID
+  localPlayer->totalMoney = 100; //set the starting money for the player
+  localPlayer->totalSum = 0; //set the starting sum for the player
+  localPlayer->head = NULL; //set the head of the hand to null
+  localPlayer->next = NULL; //set the next card to null
+  localPlayer->outOfGame = false; //set the player to not out of game
+  localPlayer->totalBet = 0; //set the player's total bet to 0
+  Player_Struct = localPlayer; //set the player struct to the local player
   //make player hand using hand struct
+  player* dealer = (player *)malloc(sizeof(player)); //allocate memory for the dealer
+  dealer->playerNumber = 0; //set the player number to 0 for the dealer
+  dealer->totalMoney = 0; //set the starting money for the dealer
+  dealer->totalSum = 0; //set the starting sum for the dealer
+  dealer->head = NULL; //set the head of the hand to null
+  dealer->next = NULL; //set the next card to null
+  dealer->outOfGame = false; //set the dealer to not out of game
+  dealer->totalBet = 0; //set the dealer's total bet to 0
+  Dealer_Struct = dealer; //set the player struct to the dealer
+  //We dont care about anything except for the hand for the dealer lol. 
 
   //Start wireless and wait for dealer ping
 
@@ -60,6 +81,7 @@ void dealer_init_game(){
   dealer->next = NULL; //set the next card to null
   dealer->outOfGame = false; //set the dealer to not out of game
   dealer->totalBet = 0; //set the dealer's total bet to 0
+  Player_Struct = dealer; //set the player struct to the dealer
   playerQueue[0] = dealer; //set the dealer as the first player in the queue
   
   
@@ -98,16 +120,5 @@ void dealer_init_game(){
 }
 
 void loop() {
- if( circleQueueHead->outOfGame == false){
-  //talk to erin and yasmine
- }
-
- if(*circleQueueHead == playerQueue[numPlayers -1]) //chaning turn (typo but im pissed off at the curser)
- {
-  circleQueueHead = playerQueue[0];
-  currPlayer = 1;
- }
- else{
-  circleQueueHead = playerQueue[currPlayers]; //currplayer is always one higher to account for the 0th spot in the array, so this increases the turn by 1
-  currPlayer++;
+  //Never gets reached - all game logic is in the setup function
 }

@@ -29,10 +29,10 @@ struct Card_struct* dealer_cards = NULL;
 int is_hidden = 1;
 
 // Struct to define linked list for added player cards and added visable dealer cards with two different heads 
-struct Node {
-  struct Node* next;
+typedef struct node {
+  struct node* next;
   struct Card_struct card;
-};
+} Node;
 
 // Create node
 struct Node createNode(struct Card_struct card){
@@ -45,6 +45,7 @@ struct Node createNode(struct Card_struct card){
 void update_LCD(){
   lcd.clear();
   lcd.setCursor(0,0);
+  lcd.print("P: ");
   struct Node* transverser = player_cards;
   while(transverser != NULL){
     lcd.print(transverser -> card.friendlyName);
@@ -52,11 +53,13 @@ void update_LCD(){
   }
   lcd.setCursor(1,0);
   // check if the hidden card needs to be flipped over 
+  lcd.print("D: ");
   if(is_hidden == 1){
     lcd.print ("H"); //printing hidden card - later needs to be shown 
   }
   else{
     lcd.print(hidden_dealer_card.friendlyName)
+    lcd.print(hidden_dealer_card.suit);
   }
   lcd.setCursor(1,1);
   transverser = dealer_cards;
