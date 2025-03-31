@@ -40,7 +40,8 @@ void player_init_game(){
   localPlayer->totalSum = 0; //set the starting sum for the player
   localPlayer->head = NULL; //set the head of the hand to null
   localPlayer->next = NULL; //set the next card to null
-  localPlayer->outOfGame = false; //set the player to not out of game
+  localPlayer->stand = false; //set the player to not out of game
+  localPlayer->fold = false; //set the player to not folded
   localPlayer->totalBet = 0; //set the player's total bet to 0
   Player_Struct = localPlayer; //set the player struct to the local player
   //make player hand using hand struct
@@ -50,7 +51,8 @@ void player_init_game(){
   dealer->totalSum = 0; //set the starting sum for the dealer
   dealer->head = NULL; //set the head of the hand to null
   dealer->next = NULL; //set the next card to null
-  dealer->outOfGame = false; //set the dealer to not out of game
+  dealer->stand = false; //set the dealer to not out of game
+  dealer->fold = false; //set the dealer to not folded
   dealer->totalBet = 0; //set the dealer's total bet to 0
   Dealer_Struct = dealer; //set the player struct to the dealer
   //We dont care about anything except for the hand for the dealer - might not be needed
@@ -80,7 +82,8 @@ void dealer_init_game(){
   dealer->totalSum = 0; //set the starting sum for the dealer
   dealer->head = NULL; //set the head of the hand to null
   dealer->next = NULL; //set the next card to null
-  dealer->outOfGame = false; //set the dealer to not out of game
+  dealer->stand = false; //set the dealer to not out of game
+  dealer->fold = false; //set the dealer to not folded
   dealer->totalBet = 0; //set the dealer's total bet to 0
   Player_Struct = dealer; //set the player struct to the dealer
   playerQueue[0] = dealer; //set the dealer as the first player in the queue
