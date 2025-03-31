@@ -1,16 +1,24 @@
 #include "game.h"
+#include <EEPROM.h>
 
-extern bool isDealer = false;
-extern int ID;
+// Global variables
+bool isDealer = false;
+int ID;
+
+extern SoftwareSerial HC12;
+
+extern Deck_struct* deck = NULL;
+
+// Player structs
+player* This_Player_Struct = NULL;  // Pointer to the player struct
+player* Dealer_Struct = NULL;      // Pointer to the dealer struct
+
+// Other globals
+int currTurn = 1;  // Index of current player
+player** circleQueueHead; // Points to the current player 
+player* playerQueue[4];   // Queue of all possible players
+
 EEPROM.get(0, ID); // Read the ID from EEPROM
-
-extern player* This_Player_Struct = NULL; // Pointer to the player struct
-extern player* Dealer_Struct = NULL; // Pointer to the dealer struct
-//global variables
-
-int currTurn = 1;  //index of current player- ease of print later on
-player* circleQueueHead; //points to the current player 
-player playerQueue[4]; // making the queue of all possible players, if not there will be NULL
 
 void setup() {
   Serial.begin(9600); // Serial port to computer
@@ -31,7 +39,6 @@ void player_init_game(){
   localPlayer->totalMoney = 100; //set the starting money for the player
   localPlayer->totalSum = 0; //set the starting sum for the player
   localPlayer->head = NULL; //set the head of the hand to null
-  localPlayer->next = NULL; //set the next card to null
   localPlayer->over21 = false; //shows the player didnt lose
   localPlayer->stand = false; //set the player to not out of game
   localPlayer->fold = false; //set the player to not folded
@@ -64,7 +71,6 @@ void dealer_init_game(){
   dealer->totalMoney = 100; //set the starting money for the dealer
   dealer->totalSum = 0; //set the starting sum for the dealer
   dealer->head = NULL; //set the head of the hand to null
-  dealer->next = NULL; //set the next card to null
   dealer->over21 = false; //shows the dealer didnt lose
   dealer->stand = false; //set the dealer to not out of game
   dealer->fold = false; //set the dealer to not folded
@@ -75,7 +81,7 @@ void dealer_init_game(){
     
   //use startUp to ping every player and determine how many are in the game
   //if a player is available, instatiate a player struct and enrol in the queue
-  for(i = 1; i < 4; i++){
+  for(int i = 1; i < 4; i++){
     if(startUp(i) == true){
       //player is available, add to queue
       player* newPlayer = (player *)malloc(sizeof(player)); //allocate memory for the new player
@@ -83,17 +89,14 @@ void dealer_init_game(){
       newPlayer->totalMoney = 100; //set the starting money for the player
       newPlayer->totalSum = 0; //set the starting sum for the player
       newPlayer->head = NULL; //set the head of the hand to null
-      newPlayer->next = NULL; //set the next card to null
       playerQueue[i] = newPlayer; //add the player to the queue
       playerQueue[i]->outOfGame = false; //set the player to not out of game
-      numPlayers++;
     }
     }
 
   circleQueueHead = playerQueue[0]; //starting with the dealer player
   
   //initialize the deck and shuffle it
-  Deck_struct deck;
   initialize_deck(deck); //initialize the deck with 52 cards
   shuffle_deck(deck); //shuffle the deck using Fisher-Yates algorithm
 
@@ -108,7 +111,7 @@ void dealer_init_game(){
     //ping the player when it is their turn
     CommandPacket packet;
     packet.command = CMD_PING; // Set command to PING
-    packet.ID = circleQueueHead->playerNumber; // Set ID to player number
+    packet.ID = (*circleQueueHead)->playerNumber; // Set ID to player number
     packet.betAmount = 0; // Set bet amount to 0
     packet.card.suit = 'X'; // Set suit to 'X'
     packet.card.value = -1; // Set value to -1
@@ -118,9 +121,13 @@ void dealer_init_game(){
     delay(2000); // Wait for a response
     hc12_receive(1); //receive the packet in mode 0 to process the command
     
-    circleQueueHead = (playerQueue[currTurn] != NULL) ? playerQueue[currTurn] : (playerQueue[(currTurn + 1) % 4] != NULL) ? playerQueue[(currTurn + 1) % 4] : (playerQueue[(currTurn + 2) % 4] != NULL) ? playerQueue[(currTurn + 2) % 4] : playerQueue[(currTurn + 3) % 4];
+    circleQueueHead = &playerQueue[currTurn];
+    while (*circleQueueHead == NULL && currTurn < 4) {
+        currTurn = (currTurn + 1) % 4;
+        circleQueueHead = &playerQueue[currTurn];
+    }
 
-    currTurn = (circleQueueHead == playerQueue[3]) ? 0 : (currTurn + 1) % 4;
+    currTurn = (*circleQueueHead == playerQueue[3]) ? 0 : (currTurn + 1) % 4;
 
     //Show menu on LCD
     checkButtons(); //check for and handle button presses    

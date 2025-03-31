@@ -33,6 +33,7 @@ bool startUp(int playerNumber){
     packet.card.suit = 'X'; // Set suit to 'X'
     packet.card.value = -1; // Set value to -1
     packet.card.friendlyName = 'X'; // Set friendly name to 'X'
+    packet.card.next = NULL; // Set next to NULL
     hc12_send(packet); // Send the packet
     delay(2000); // Wait for a response
     // Check for a response from the other player
@@ -100,7 +101,7 @@ CommandPacket hc12_receive(int mode) {
     packet.card.value = data.substring(0, data.indexOf(",")).toInt(); // Extract value
     data = data.substring(data.indexOf(",") + 1); // Remove value from string
     packet.card.friendlyName = data.substring(0, data.indexOf(",")).charAt(0); // Extract friendly name
-        
+    packet.card.next = NULL; // Set next to NULL
     // Process command or do something with the packet here
     if (mode = 0) processCommand(packet);
     if (mode = 1) return packet;
@@ -119,6 +120,7 @@ void processCommand(CommandPacket packet) {
             ackPacket.card.suit = 'X'; // Set suit to 'X'
             ackPacket.card.value = -1; // Set value to -1
             ackPacket.card.friendlyName = 'X'; // Set friendly name to 'X'
+            ackPacket.card.next = NULL; // Set next to NULL
             hc12_send(ackPacket); // Send ACK packet
             free(&ackPacket); // Free the memory allocated for the ACK packet
             Serial.println("ACK sent"); // debug print
@@ -136,13 +138,13 @@ void processCommand(CommandPacket packet) {
             // Add the card to the player's hand
             if(packet.ID == ID) {
                 // Add the card to the player's hand
-                add_player_card(newCard); // Uncomment this line to add the card to the player's hand
+                add_player_card(&newCard); // Uncomment this line to add the card to the player's hand
             } else if (packet.ID == 0) {
                 // Add the card to the dealer's hand
                 if(is_hidden == 1) {
-                    add_hidden_dealer_card(newCard); 
+                    add_hidden_dealer_card(&newCard); 
                     is_hidden = 0; // Set is_hidden to 0 if the dealer's card is hidden
-                } else add_visable_dealer_card(newCard); // Add the card to the dealer's visible hand
+                } else add_visable_dealer_card(&newCard); // Add the card to the dealer's visible hand
             }
             free(&newCard); // Free the memory allocated for the new card
 

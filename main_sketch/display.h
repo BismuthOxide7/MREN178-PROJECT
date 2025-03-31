@@ -17,19 +17,12 @@ extern const int pin_BL;  // = 10
 // Declare LCD object as extern
 extern LiquidCrystal lcd;
 
-// Node structure for linked lists
-typedef struct node {
-    node* next;
-    Card_struct card;
-} Node;
-
 // Function prototypes
 bool Show_Hands();
-Node createNode(Card_struct card);
-int add_player_card(Card_struct &card);
-int add_hidden_dealer_card(Card_struct &card);
-int add_visable_dealer_card(Card_struct &card);
-int clear_list(Node* p_head);
+int add_player_card(Card_struct* card);
+int add_hidden_dealer_card(Card_struct* card);
+int add_visable_dealer_card(Card_struct *card);
+int clear_list(Card_struct* p_head);
 int new_game();
 
 // External variables

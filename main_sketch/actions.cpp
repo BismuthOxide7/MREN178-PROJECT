@@ -4,23 +4,23 @@
 #include "cards.h"
 #include "actions.h"
 
+extern Deck_struct* deck; // Declare the deck as an external variable
+
 void hit(player* currPlay) 
 {
-    Card_Struct *newCard = (Card_Struct *)malloc(sizeof(Card_Struct)); // Sanity check- make sure the arduino is okay (sufficient memory cuz they're small)
+    Card_struct *newCard = (Card_struct *)malloc(sizeof(Card_struct)); // Fixed type name
     if (!newCard) {
-        //Serial.println("Memory allocation failed- womp womp");
+        Serial.println("Memory allocation failed");
         return;
     }
     
-    *newCard = draw_Card();  // Assign the drawn card
-    newCard->next = NULL;
+    *newCard = draw_card(deck);  // Fixed function name to match cards.h
 
     if (currPlay->head == NULL) {
         currPlay->head = newCard;
     } 
-    
     else {
-        Card_Struct *traverse = currPlay->head;
+        Card_struct *traverse = currPlay->head;
         while (traverse->next != NULL) {
             traverse = traverse->next;
         }
@@ -30,7 +30,6 @@ void hit(player* currPlay)
     currPlay->totalSum += newCard->value;
 
     if (currPlay->totalSum > 21) {
-        //Serial.print("Player %d loses! Total: %d\n", currPlay.playerNumber, currPlay.totalSum);
         currPlay->over21 = true;
     }
 }

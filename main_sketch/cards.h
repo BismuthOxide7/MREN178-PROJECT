@@ -4,10 +4,11 @@
 #include <Arduino.h>
 
 // Card struct definition
-typedef struct {
+typedef struct card_struct {
   char suit;          // 'H' = Hearts, 'D' = Diamonds, 'C' = Clubs, 'S' = Spades
   int value;          // 1-10 (Ace to King)
   char friendlyName;  // 'A' for Ace, '2'-'9', 'T' for 10, 'J' for Jack, 'Q' for Queen, 'K' for King
+  card_struct* next;  // Changed from Card_Struct to Card_struct
 } Card_struct;
 
 // Deck struct (Stack Implementation)
@@ -18,8 +19,8 @@ typedef struct {
 
 // Function prototypes
 Card_struct make_card(char suit, int value, char friendlyName);  // Create a card
-void initialize_deck(Deck_struct &deck);  // Initialize deck with 52 cards
-Card_struct draw_card(Deck_struct &deck);  // Draw a card from the deck
-void shuffle_deck(Deck_struct &deck);  // Shuffle the deck using Fisher-Yates algorithm
+void initialize_deck(Deck_struct* deck);  // Initialize deck with 52 cards
+Card_struct draw_card(Deck_struct* deck);  // Draw a card from the deck
+void shuffle_deck(Deck_struct* deck);  // Shuffle the deck using Fisher-Yates algorithm
 
 #endif /* CARDS_H_ */

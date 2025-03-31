@@ -32,7 +32,7 @@ int test_fun();
 bool startUp(int playerNumber);
 void processCommand(CommandPacket packet);
 int initialise_transciever();
-void hc12_send(CommandType cmd, Card_struct card = {'X', -1, 'X'});
-void hc12_receive(int mode);
+void hc12_send(CommandPacket packet);
+CommandPacket hc12_receive(int mode);
 
 #endif
