@@ -30,7 +30,7 @@ typedef struct {
 int test_fun();
 bool startUp(int playerNumber);
 void processCommand(CommandPacket packet);
-int initialise_transciever(int tx_pin, int rx_pin);
+int initialise_transciever();
 void hc12_send(CommandType cmd, Card_struct card = {'X', -1, 'X'});
 void hc12_receive(int mode = 0);
 

@@ -56,11 +56,11 @@ void player_init_game(){
   //We dont care about anything except for the hand for the dealer - might not be needed
 
   //Start wireless and wait for dealer ping
-  initialise_transciever(12,11); //initialize the transceiver
+  initialise_transciever(); //initialize the transceiver
 
   //gameplay loop 
   while(1){
-    if(hc12.available()){
+    if(HC12.available()){
       hc12_receive(0); //receive and process a command packet
     }
     //check for button presses, transmit commands, and update display

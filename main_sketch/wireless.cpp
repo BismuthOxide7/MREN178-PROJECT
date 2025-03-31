@@ -16,7 +16,7 @@
 #define BAUDRATE 9600 // Globally delcared baud rate
 
 // HC-12 instance (declared globally)
-SoftwareSerial HC12(tx, rx);  // TX: 10, RX: 11 in #define
+extern SoftwareSerial HC12(tx, rx);  // TX: 10, RX: 11 in #define
 
 // test function (to see if the header files and #includes worked)
 int test_fun() {
@@ -126,12 +126,29 @@ void processCommand(CommandPacket packet) {
             //do nothing, ack should get picked up in mode 1 receives
             break;
         case CMD_RECEIVE_THIS_CARD:
-            //add card to hand if player ID matches packet ID
-            
+            //add card to player_struct hand if packet id = player id 
+            Card_struct newCard;
+            newCard.suit = packet.card.suit; // Set suit to received card's suit
+            newCard.value = packet.card.value; // Set value to received card's value
+            newCard.friendlyName = packet.card.friendlyName; // Set friendly name to received card's friendly name
+            // Add the card to the player's hand
+            if(packet.ID == ID) {
+                // Add the card to the player's hand
+                add_player_card(newCard); // Uncomment this line to add the card to the player's hand
+            } else if (packet.ID == 0) {
+                // Add the card to the dealer's hand
+                if(is_hidden == 1) {
+                    add_hidden_dealer_card(newCard); 
+                    is_hidden = 0; // Set is_hidden to 0 if the dealer's card is hidden
+                } else add_visable_dealer_card(newCard); // Add the card to the dealer's visible hand
+            }
+                        
             Serial.print("Received Card: ");// debug print
             Serial.print(packet.card.suit);// debug print
             Serial.print(" ");// debug print
-            Serial.println(packet.card.value);// debug print
+            Serial.print(packet.card.value);// debug print
+            Serial.print(" ");// debug print
+            Serial.println(packet.card.friendlyName);// debug print
             break;
         case CMD_HIT:
             Serial.println("Received: HIT");// debug print
@@ -142,15 +159,31 @@ void processCommand(CommandPacket packet) {
             break;
         case CMD_STAY:
             Serial.println("Received: STAY");// debug print
+            //dealer moves on to next player
+            // Call stay function with the current player
+            //stay(circleQueueHead); // Uncomment this line to call the stay function
             break;
         case CMD_FOLD:
             Serial.println("Received: FOLD");// debug print
+            //Player folds, dealer removes it from queue
             break;
         case CMD_WIN:
             Serial.println("Received: WIN");// debug print
+            //Print that you won to the LCD, and update the player struct with the new money
+            //Add the bet amount to the player's total money
+            //lcd.print("You won!"); // Uncomment this line to print "You won!" to the LCD
+            //lcd.print("You have: "); // Uncomment this line to print "You have:" to the LCD
+            //print total money adding the packet bet amount to the player structs money
+            //lcd.print(packet.betAmount + player_struct.totalMoney); // Uncomment this line to print the total money to the LCD
+            //player_struct.totalMoney += packet.betAmount; // Uncomment this line to update the player's total money
             break;
         case CMD_LOSE:
             Serial.println("Received: LOSE");// debug print
+            //Print that you lost to the LCD, and update the player struct with the new money
+            //lcd.print("You lost!"); // Uncomment this line to print "You lost!" to the LCD
+            //lcd.print("You have: "); // Uncomment this line to print "You have:" to the LCD
+            //print total money to the lcd
+            //lcd.print(player_struct.totalMoney); // Uncomment this line to print the total money to the LCD 
             break;
         default:
             Serial.println("Unknown command received");// debug print
