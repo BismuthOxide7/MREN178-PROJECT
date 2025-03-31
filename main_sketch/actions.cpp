@@ -4,7 +4,7 @@
 #include "cards.h"
 #include "actions.h"
 
-void hit(Player *currPlay) 
+void hit(player *currPlay) 
 {
     Card_Struct *newCard = (Card_Struct *)malloc(sizeof(Card_Struct)); // Sanity check- make sure the arduino is okay (sufficient memory cuz they're small)
     if (!newCard) {
@@ -35,20 +35,20 @@ void hit(Player *currPlay)
     }
 }
 
-void stand(Player *currPlay)
+void stand(player *currPlay)
 {
     Serial.printf("Player %d stands with a total: %d\n", currPlay.playerNumber, currPlay.totalSum);
     currPlay.outOfGame = true;
 }
 
-void fold(Player *currPlay)
+void fold(player *currPlay)
 {
     currPlay.totalBet *= 0.5;
     Serial.printf("Player %d folds! Half the bet is retracted, leaving %d. Player card total: %d\n", currPlay.playerNumber, currPlay.totalBet, currPlay.totalSum);
     currplay.outOfGame = true;
 }
 
-void initialBet(Player *currPlay)
+void initialBet(player *currPlay)
 {
     Serial.printf("Place your initial bet. You have %d dollars.\n", currPlay.tokens);
     
@@ -61,7 +61,7 @@ void initialBet(Player *currPlay)
     currPlay.totalBet = potBet;
 }
 
-void doubleDown(Player *currPlay)
+void doubleDown(player *currPlay)
 {
     if (currPlay.tokens >= currPlay.totalBet) {
         currPlay.tokens -= currPlay.totalBet;
