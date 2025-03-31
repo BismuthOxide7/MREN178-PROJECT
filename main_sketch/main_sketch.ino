@@ -80,7 +80,7 @@ void dealer_init_game(){
   Player_Struct = dealer; //set the player struct to the dealer
   playerQueue[0] = dealer; //set the dealer as the first player in the queue
   
-  
+    
   //use startUp to ping every player and determine how many are in the game
   //if a player is available, instatiate a player struct and enrol in the queue
   for(i = 1; i < 4; i++){
