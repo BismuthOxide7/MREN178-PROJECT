@@ -7,9 +7,9 @@
 #include "display.h"
 #include <Arduino.h>
 
+extern player This_Player_Struct;
 
-
-
+extern int ID;
 
 // Add at the top with other global variables
 const char* menuItems[] = {
@@ -23,54 +23,72 @@ int menuIndex = 0;  // Current menu selection
 
 void checkButtons() {
     int buttonValue = analogRead(BTN_PIN);
+    static bool actionTaken = false;
 
-    if (buttonValue == BTN_UP ||  buttonValue == BTN_RIGHT) { // UP - Move menu up
-        menuIndex--;
-        if (menuIndex < 0) menuIndex = 4;
-        updateMenu();
-        delay(300);
-    } else if (buttonValue == BTN_DOWN || buttonValue == BTN_LEFT){ // DOWN - Move menu down
-        menuIndex++;
-        if (menuIndex > 4) menuIndex = 0;
-        updateMenu();
-        delay(300);
-    } else if (buttonValue == BTN_SELECT) { // SELECT - Choose menu option
-        Serial.print("Selected: ");
-        Serial.println(menuItems[menuIndex]);
-
-        // Show the selected action on the LCD
-        lcd.clear();
-        lcd.setCursor(0, 0);
-        lcd.print("Selected:");
-        lcd.setCursor(0, 1);
-        lcd.print(menuItems[menuIndex]);
-        delay(1000);  // Show selection for 1 second
-
-        // Perform action based on selection
-        switch (menuIndex) {
-            case 0:  // Hit
-                Serial.println("Player chose HIT!");
-                //Send a command to hit
-                break;
-            case 1:  // Stay
-                Serial.println("Player chose STAY!");
-                //Send a command to stay
-                break;
-            case 2:  // Fold
-                Serial.println("Player chose FOLD!");
-                //Send a command to fold
-                break;
-            case 3:  // Bet
-                //send a command with a bet
-                break;
-            case 4:  // View Hand
-                //View the player and dealer's hands
-                while(!Show_Hands());
-                break;
+    // Handle navigation buttons
+    if (!actionTaken) {
+        if ((buttonValue <= BTN_UP + 100 && buttonValue >= BTN_UP - 100) || 
+            (buttonValue <= BTN_RIGHT + 100 && buttonValue >= BTN_RIGHT - 100)) {
+            menuIndex--;
+            if (menuIndex < 0) menuIndex = 3;
+            updateMenu();
+            delay(300);
+        } 
+        else if ((buttonValue <= BTN_DOWN + 100 && buttonValue >= BTN_DOWN - 100) || 
+                 (buttonValue <= BTN_LEFT + 100 && buttonValue >= BTN_LEFT - 100)) {
+            menuIndex++;
+            if (menuIndex > 3) menuIndex = 0;
+            updateMenu();
+            delay(300);
+        } 
+        else if (buttonValue <= BTN_SELECT + 100 && buttonValue >= BTN_SELECT - 100) {
+            // Only process select button if no action has been taken
+            switch (menuIndex) {
+                case 0:  // View Hands
+                    Show_Hands();
+                    delay(2000);  // Show hands for 2 seconds
+                    actionTaken = false;  // Allow returning to menu
+                    updateMenu();
+                    break;
+                    
+                case 1:  // Hit
+                    if(ID == 0) {
+                        hit(*This_Player_Struct);
+                    } else {
+                        CommandPacket packet;
+                        packet.command = CMD_HIT;
+                        packet.ID = ID;
+                        hc12_send(packet);
+                    }
+                    actionTaken = true;
+                    break;
+                    
+                case 2:  // Stay
+                    if(ID == 0) {
+                        //stand(This_Player_Struct);
+                    } else {
+                        CommandPacket packet;
+                        packet.command = CMD_STAY;
+                        packet.ID = ID;
+                        hc12_send(packet);
+                    }
+                    actionTaken = true;
+                    break;
+                    
+                case 3:  // Fold
+                    if(ID == 0) {
+                        //fold(This_Player_Struct);
+                    } else {
+                        CommandPacket packet;
+                        packet.command = CMD_FOLD;
+                        packet.ID = ID;
+                        hc12_send(packet);
+                    }
+                    actionTaken = true;
+                    break;
+            }
+            delay(300);
         }
-
-        // After the action is processed, return to the menu
-        updateMenu();
     }
 }
 
@@ -80,4 +98,10 @@ void updateMenu(){
     lcd.print("Menu: ");
     lcd.setCursor(0, 1);
     lcd.print(menuItems[menuIndex]);
+}
+
+// Add this function to reset the menu state
+void resetMenuState() {
+    menuIndex = 0;
+    updateMenu();
 }

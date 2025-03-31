@@ -3,13 +3,13 @@
 
 // Global variables
 bool isDealer = false;
-int ID;
+int ID;  // Will be set from EEPROM
 
 extern Deck_struct* deck = NULL;
 extern bool isPinged; // Flag to check if pinged
 
 // Player structs
-player* This_Player_Struct = NULL;  // Pointer to the player struct
+extern player* This_Player_Struct = NULL;  // Pointer to the player struct
 player* Dealer_Struct = NULL;      // Pointer to the dealer struct
 
 // Other globals
@@ -22,6 +22,8 @@ player* playerQueue[4];   // Queue of all possible players
 
 void setup() {
   ID = (int)EEPROM.read(0); // Read the ID from EEPROM
+  const int PLAYER_ID = ID;  // Make constant after read
+  ID = PLAYER_ID;  // Assign back to ensure immutability
   Serial.begin(9600); // Serial port to computer
   HC12.begin(9600);
   lcd.begin(16,2);
@@ -167,7 +169,7 @@ void dealer_init_game(){
   lcd.clear();
   lcd.setCursor(0,0);
   lcd.print("Game Start!");
-
+  bool hasPlayed = false;
   //main gameplay loop
   while(1) {
     if(HC12.available()) {
@@ -175,11 +177,13 @@ void dealer_init_game(){
     }
     
     //operate the queue in the background. ping a player when it is their turn
-    if(circleQueueHead == playerQueue[0]) {
-      //dealer's turn, show the dealer's hand on the LCD
+    if(circleQueueHead == playerQueue[0] && !hasPlayed) {
       static bool dealerTurnDisplayed = false;
+      static bool menuDisplayed = false;
+      static unsigned long lastButtonPress = 0;
       
-      if (!dealerTurnDisplayed) {
+      // Show initial "Your Turn" message
+      if (!dealerTurnDisplayed && !menuDisplayed) {
         lcd.clear();
         lcd.setCursor(0,0);
         lcd.print("Your Turn!");
@@ -187,15 +191,37 @@ void dealer_init_game(){
         lcd.print("Press Select");
         dealerTurnDisplayed = true;
       }
+
+      int buttonValue = analogRead(BTN_PIN);
+      unsigned long currentTime = millis();
       
-      if (analogRead(BTN_PIN) == BTN_SELECT) {
-        dealerTurnDisplayed = false;
-        updateMenu();
-        // Add dealer turn logic here
-          
-        // Move to next player after dealer's turn
-        currTurn = (currTurn + 1) % 4;
-        circleQueueHead = playerQueue[currTurn];
+      // First SELECT press - Show menu
+      if ((buttonValue <= BTN_SELECT + 100 && buttonValue >= BTN_SELECT - 100) && 
+          (currentTime - lastButtonPress > 250)) {
+        if (dealerTurnDisplayed && !menuDisplayed) {
+          Serial.println("SELECT PRESSED - SHOWING MENU");
+          dealerTurnDisplayed = false;
+          menuDisplayed = true;
+          updateMenu();
+          lastButtonPress = currentTime;
+        } else if (menuDisplayed) {
+          // Let checkButtons handle the menu selection
+          checkButtons();
+          hasPlayed = true;
+          currTurn = (currTurn + 1) % 4;
+          circleQueueHead = playerQueue[currTurn];
+          menuDisplayed = false;
+          lastButtonPress = currentTime;
+        }
+      } 
+      
+      // Menu navigation - use checkButtons instead of duplicating logic
+      if (menuDisplayed && (currentTime - lastButtonPress > 250)) {
+        if ((buttonValue <= BTN_UP + 100 && buttonValue >= BTN_UP - 100) || 
+            (buttonValue <= BTN_DOWN + 100 && buttonValue >= BTN_DOWN - 100)) {
+          checkButtons();  // Let buttons.cpp handle navigation
+          lastButtonPress = currentTime;
+        }
       }
     } else {
       //iterate if head is null
@@ -218,11 +244,12 @@ void dealer_init_game(){
       while(HC12.available()) {
         hc12_receive(0);
       }
-
+      hasPlayed = true;
       currTurn = (circleQueueHead == playerQueue[3]) ? 0 : (currTurn + 1) % 4;
     }
   }
 }
+
 
 void loop() {
   //Never gets reached - all game logic is in the setup function

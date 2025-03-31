@@ -106,8 +106,8 @@ CommandPacket hc12_receive(int mode) {
     data = data.substring(data.indexOf(",") + 1); // Remove value from string
     packet.card.friendlyName = data.substring(0, data.indexOf(",")).charAt(0); // Extract friendly name
         
-    if (mode == 0) processCommand(packet);
-    if (mode == 1) return packet;
+    if (mode == 0 && packet.ID == ID) processCommand(packet);
+    if (mode == 1 && packet.ID == ID) return packet;
 }
 
 // Function to handle received commands
