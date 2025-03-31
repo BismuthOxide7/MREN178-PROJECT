@@ -17,8 +17,8 @@ extern player* Dealer_Struct = NULL; // Pointer to the dealer struct
 //global variables
 
 int currTurn = 0;  //index of current player- ease of print later on
-player* circleQueueHead; //points to the current player
-
+player* circleQueueHead; //points to the current player 
+player playerQueue[4]; // making the queue of all possible players, if not there will be NULL
 
 void setup() {
   Serial.begin(9600); // Serial port to computer
@@ -59,6 +59,7 @@ void player_init_game(){
     //check for dealer message
     //check for player actions and update display
     //check for game over conditions and update display
+    //thing to call funcions_ ask ben!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   }
   
 }
