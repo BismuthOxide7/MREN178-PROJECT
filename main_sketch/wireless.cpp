@@ -142,7 +142,7 @@ void processCommand(CommandPacket packet) {
                     is_hidden = 0; // Set is_hidden to 0 if the dealer's card is hidden
                 } else add_visable_dealer_card(newCard); // Add the card to the dealer's visible hand
             }
-                        
+            
             Serial.print("Received Card: ");// debug print
             Serial.print(packet.card.suit);// debug print
             Serial.print(" ");// debug print

@@ -7,6 +7,17 @@
 #include "display.h"
 #include <Arduino.h>
 
+// Add at the top with other global variables
+const char* menuItems[] = {
+    "Hit",
+    "Stay", 
+    "Fold",
+    "Bet",
+    "View Hands"
+};
+
+int menuIndex = 0;  // Current menu selection
+
 void checkButtons() {
     int buttonValue = analogRead(BTN_PIN);
 
@@ -36,23 +47,22 @@ void checkButtons() {
         switch (menuIndex) {
             case 0:  // Hit
                 Serial.println("Player chose HIT!");
-                hc12_send(CMD_HIT);
+                //Send a command to hit
                 break;
             case 1:  // Stay
                 Serial.println("Player chose STAY!");
-                hc12_send(CMD_STAY);
+                //Send a command to stay
                 break;
             case 2:  // Fold
                 Serial.println("Player chose FOLD!");
-                hc12_send(CMD_FOLD);
+                //Send a command to fold
                 break;
             case 3:  // Bet
-                Serial.println("Player chose BET!");
-                hc12_send(CMD_BET);
+                //send a command with a bet
                 break;
             case 4:  // View Hand
-                Serial.println("Player chose VIEW HAND!");
-                hc12_send(CMD_RECEIVE_THIS_CARD);
+                //View the player and dealer's hands
+                while(!Show_Hands());
                 break;
         }
 
@@ -61,7 +71,10 @@ void checkButtons() {
     }
 }
 
-
-        updateMenu(); // Return to menu
-    }
+void updateMenu(){
+    lcd.clear();
+    lcd.setCursor(0, 0);
+    lcd.print("Menu: ");
+    lcd.setCursor(0, 1);
+    lcd.print(menuItems[menuIndex]);
 }

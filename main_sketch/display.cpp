@@ -28,11 +28,6 @@ struct Card_struct* player_cards = NULL;
 struct Card_struct* dealer_cards = NULL;
 int is_hidden = 1;
 
-// Struct to define linked list for added player cards and added visable dealer cards with two different heads 
-typedef struct node {
-  struct node* next;
-  struct Card_struct card;
-} Node;
 
 // Create node
 struct Node createNode(struct Card_struct card){
@@ -42,7 +37,7 @@ struct Node createNode(struct Card_struct card){
 }
 
 // Update LCD display with linked lists and hidden card 
-void update_LCD(){
+void Show_Hands(){
   lcd.clear();
   lcd.setCursor(0,0);
   lcd.print("P: ");

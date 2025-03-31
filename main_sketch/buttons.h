@@ -7,8 +7,11 @@
 // LCD Keypad Shield uses A0 for button input
 #define BTN_PIN A0  
 
+// Menu variables
+extern const char* menuItems[];
+extern int menuIndex;
+
 // Menu navigation
-void setupButtons();
 void checkButtons();
 void updateMenu();
 

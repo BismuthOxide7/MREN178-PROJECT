@@ -43,18 +43,7 @@ void player_init_game(){
   localPlayer->outOfGame = false; //set the player to not out of game
   localPlayer->totalBet = 0; //set the player's total bet to 0
   Player_Struct = localPlayer; //set the player struct to the local player
-  //make player hand using hand struct
-  player* dealer = (player *)malloc(sizeof(player)); //allocate memory for the dealer
-  dealer->playerNumber = 0; //set the player number to 0 for the dealer
-  dealer->totalMoney = 0; //set the starting money for the dealer
-  dealer->totalSum = 0; //set the starting sum for the dealer
-  dealer->head = NULL; //set the head of the hand to null
-  dealer->next = NULL; //set the next card to null
-  dealer->outOfGame = false; //set the dealer to not out of game
-  dealer->totalBet = 0; //set the dealer's total bet to 0
-  Dealer_Struct = dealer; //set the player struct to the dealer
-  //We dont care about anything except for the hand for the dealer - might not be needed
-
+  
   //Start wireless and wait for dealer ping
   initialise_transciever(); //initialize the transceiver
 
@@ -63,7 +52,8 @@ void player_init_game(){
     if(HC12.available()){
       hc12_receive(0); //receive and process a command packet
     }
-    //check for button presses, transmit commands, and update display
+    //Show menu on LCD
+    checkButtons(); //check for and handle button presses
     //check for dealer message
     //check for player actions and update display
     //check for game over conditions and update display
