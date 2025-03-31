@@ -10,6 +10,8 @@
 // Declare the ID variable as extern to reference the one in main.ino
 extern int ID;
 
+extern bool isPinged = false; // Flag to check if pinged
+
 // Fix the pin definitions
 #define RX_PIN 11
 #define TX_PIN 12
@@ -33,43 +35,45 @@ bool startUp(int playerNumber){
     packet.card.suit = 'X'; // Set suit to 'X'
     packet.card.value = -1; // Set value to -1
     packet.card.friendlyName = 'X'; // Set friendly name to 'X'
-    packet.card.next = NULL; // Set next to NULL
+
+    Serial.print("Sending PING to player ");
+    Serial.println(playerNumber);
     hc12_send(packet); // Send the packet
-    delay(2000); // Wait for a response
+    unsigned long startTime = millis();
+    while (millis() - startTime < 500) {
+        // Non-blocking delay
+    }
+
     // Check for a response from the other player
     if (HC12.available()) {
+        Serial.println("Data available on HC12, receiving...");
         CommandPacket rec_pckt = hc12_receive(1); // Receive the packet in mode 1 (returns the packet)
         if(rec_pckt.command == CMD_ACK) { // Check if the received command is ACK
             Serial.println("ACK received"); // Print debug message
             return true; // Return success
-        } 
-        else return false; // Return failure if not ACK
- 
+        } else {
+            Serial.print("Received non-ACK command: ");
+            Serial.println(rec_pckt.command);
+            return false; // Return failure if not ACK
         }
-
+    } else {
+        Serial.println("No data available on HC12 after ping.");
+        return false; // Return failure if not ACK
+    }
+    isPinged = true;
     return false;
 }
 
-// Function to initialize the transceiver
-int initialise_transciever() {
-    HC12.begin(BAUDRATE);  // Start communication
-    delay(100); // Wait
-    if(HC12.available()){
-        return 0;  // Return success
-    } else return -1; // return failure. 
-}
 
 // Function to send a command packet
 void hc12_send(CommandPacket packet) {
     // Message order: <ID, CMD, BET, (SUIT, VALUE, FRIENDLYNAME)>
     String message = '<' + String(packet.ID) + "," + String(packet.command) + "," + String(packet.betAmount) + "," + '(' + String(packet.card.suit) + ',' 
     + String(packet.card.value) + ',' + String(packet.card.friendlyName) + ')' + '>';    
-    //Serial.println("sent: " + message);
+    Serial.println("sent: " + message);
     // Send the string via HC12
     HC12.print(message);
 }
-
-
 
 // Function to receive a command packet
 CommandPacket hc12_receive(int mode) {
@@ -81,12 +85,12 @@ CommandPacket hc12_receive(int mode) {
             char receivedChar = (char)HC12.read();
             data += receivedChar;
             if (receivedChar == '>'){
-              //DEBUG Serial.println("rcv: " + data);
+              Serial.println("rcv: " + data);
               break;  // Stop reading when '>' is found
             }
         }
     } else {
-      while(HC12.peek() != '<') Serial.print(HC12.read()); // consume char
+      while(HC12.peek() != '<') (HC12.read()); // consume char
     }
 
     CommandPacket packet; // Create a new packet
@@ -101,10 +105,9 @@ CommandPacket hc12_receive(int mode) {
     packet.card.value = data.substring(0, data.indexOf(",")).toInt(); // Extract value
     data = data.substring(data.indexOf(",") + 1); // Remove value from string
     packet.card.friendlyName = data.substring(0, data.indexOf(",")).charAt(0); // Extract friendly name
-    packet.card.next = NULL; // Set next to NULL
-    // Process command or do something with the packet here
-    if (mode = 0) processCommand(packet);
-    if (mode = 1) return packet;
+        
+    if (mode == 0) processCommand(packet);
+    if (mode == 1) return packet;
 }
 
 // Function to handle received commands
@@ -112,18 +115,34 @@ void processCommand(CommandPacket packet) {
     switch (packet.command) { // switch case through the commands enum
         case CMD_PING:
             Serial.println("Received: PING"); // debug print
-            // Send ACK back to sender
-            CommandPacket ackPacket;
-            ackPacket.command = CMD_ACK; // Set command to ACK
-            ackPacket.ID = packet.ID; // Set ID to sender's ID
-            ackPacket.betAmount = 0; // Set bet amount to 0
-            ackPacket.card.suit = 'X'; // Set suit to 'X'
-            ackPacket.card.value = -1; // Set value to -1
-            ackPacket.card.friendlyName = 'X'; // Set friendly name to 'X'
-            ackPacket.card.next = NULL; // Set next to NULL
-            hc12_send(ackPacket); // Send ACK packet
-            free(&ackPacket); // Free the memory allocated for the ACK packet
-            Serial.println("ACK sent"); // debug print
+            // Send ACK back to sender if its the starup ping
+            if(!isPinged){ // Check if the player is pinged
+                CommandPacket ackPacket; // Create a new packet for ACK
+                ackPacket.command = CMD_ACK; // Set command to ACK
+                ackPacket.ID = packet.ID; // Set ID to sender's ID
+                ackPacket.betAmount = 0; // Set bet amount to 0
+                ackPacket.card.suit = 'X'; // Set suit to 'X'
+                ackPacket.card.value = -1; // Set value to -1
+                ackPacket.card.friendlyName = 'X'; // Set friendly name to 'X'
+                Serial.println("Sending ACK");
+                hc12_send(ackPacket); // Send ACK packet
+                Serial.println("ACK sent"); // debug print
+                lcd.clear();
+                lcd.setCursor(0,0);
+                lcd.print("Added to Game");
+                lcd.setCursor(1,1);
+                lcd.print("Wait for Turn");
+
+            } else {
+                //print to LCD that it's the player's turn
+                lcd.clear(); // Clear the LCD
+                lcd.setCursor(0, 0); // Set cursor to first line
+                lcd.print("Your turn!"); // Print "Your turn!" to the LCD
+                lcd.setCursor(0, 1); // Set cursor to second line
+                lcd.print("Press Select"); // Print to the LCD
+                checkButtons();
+            }
+            
             break;
         case CMD_ACK:
             Serial.println("Received: ACK");// debug print
@@ -138,15 +157,14 @@ void processCommand(CommandPacket packet) {
             // Add the card to the player's hand
             if(packet.ID == ID) {
                 // Add the card to the player's hand
-                add_player_card(&newCard); // Uncomment this line to add the card to the player's hand
+                //add_player_card(&newCard); // Uncomment this line to add the card to the player's hand
             } else if (packet.ID == 0) {
                 // Add the card to the dealer's hand
                 if(is_hidden == 1) {
-                    add_hidden_dealer_card(&newCard); 
+                    //add_hidden_dealer_card(&newCard); 
                     is_hidden = 0; // Set is_hidden to 0 if the dealer's card is hidden
-                } else add_visable_dealer_card(&newCard); // Add the card to the dealer's visible hand
+                } else return;//add_visable_dealer_card(&newCard); // Add the card to the dealer's visible hand
             }
-            free(&newCard); // Free the memory allocated for the new card
 
             Serial.print("Received Card: ");// debug print
             Serial.print(packet.card.suit);// debug print

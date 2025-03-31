@@ -6,6 +6,7 @@ bool isDealer = false;
 int ID;
 
 extern Deck_struct* deck = NULL;
+extern bool isPinged; // Flag to check if pinged
 
 // Player structs
 player* This_Player_Struct = NULL;  // Pointer to the player struct
@@ -13,15 +14,21 @@ player* Dealer_Struct = NULL;      // Pointer to the dealer struct
 
 // Other globals
 int currTurn = 1;  // Index of current player
-player** circleQueueHead; // Points to the current player 
+player* circleQueueHead; // Points to the current player 
 player* playerQueue[4];   // Queue of all possible players
 
 
 
 
 void setup() {
-  EEPROM.get(0, ID); // Read the ID from EEPROM
+  ID = (int)EEPROM.read(0); // Read the ID from EEPROM
   Serial.begin(9600); // Serial port to computer
+  HC12.begin(9600);
+  lcd.begin(16,2);
+
+  Serial.print("ID read from EEPROM: ");
+  Serial.println(ID);
+
   if(ID == 0){
     isDealer = true;
     //DEALER ARDUINO, handles wireless transmission and deck
@@ -33,6 +40,7 @@ void setup() {
 }
 
 void player_init_game(){
+  Serial.println("Initializing player...");
   //make player struct for local player
   player* localPlayer = (player *)malloc(sizeof(player)); //allocate memory for the player
   localPlayer->playerNumber = ID; //set the player number to the ID
@@ -45,12 +53,25 @@ void player_init_game(){
   localPlayer->totalBet = 0; //set the player's total bet to 0
   This_Player_Struct = localPlayer; //set the player struct to the local player
 
+  //print some startup info to the screen
+  lcd.clear(); //clear the screen
+  lcd.setCursor(0,0); //set the cursor to the first line
+  lcd.print("Player ID: "); //print the player ID
+  lcd.print(ID); //print the player ID
+  lcd.setCursor(0,1); //set the cursor to the second line
+  lcd.print("Waiting..."); //print waiting for
   //Start wireless and wait for dealer ping
-  initialise_transciever(); //initialize the transceiver
-
+  Serial.println("Initializing transceiver...");
+  if(HC12.available()) Serial.println("Transceiver initialized.");
+  while(!isPinged){
+    if(HC12.available()){
+      hc12_receive(0); //receive the packet in mode 0 to process the command
+    }
+  } // wait for the dealer to ping the player
   //gameplay loop 
   while(1){
     if(HC12.available()){
+      Serial.println("Data available on HC12, receiving...");
       hc12_receive(0); //receive and process a command packet
     }
     //Show menu on LCD
@@ -64,6 +85,7 @@ void player_init_game(){
 }
 
 void dealer_init_game(){
+  Serial.println("Initializing dealer...");
   //if this function is called, then the dealer is the first player
   //initialize the dealer with a player struct and set the ID to 0
   player* dealer = (player *)malloc(sizeof(player)); //allocate memory for the dealer
@@ -78,11 +100,25 @@ void dealer_init_game(){
   This_Player_Struct = dealer; //set the player struct to the dealer
   playerQueue[0] = dealer; //set the dealer as the first player in the queue
   
+  //print some startup info to the screen
+  lcd.clear(); //clear the screen
+  lcd.setCursor(0,0); //set the cursor to the first line
+  lcd.print("Player ID: "); //print the player ID
+  lcd.print(ID); //print the player ID
+  lcd.setCursor(0,1); //set the cursor to the second line
+  lcd.print("Setting Up..."); //print waiting for
     
   //use startUp to ping every player and determine how many are in the game
   //if a player is available, instatiate a player struct and enrol in the queue
+  int numPlayers = 1; // dealer always plays
+  Serial.println("Starting player discovery...");
   for(int i = 1; i < 4; i++){
+    Serial.print("Pinging player ");
+    Serial.println(i);
     if(startUp(i) == true){
+      Serial.print("Player ");
+      Serial.print(i);
+      Serial.println(" responded");
       //player is available, add to queue
       player* newPlayer = (player *)malloc(sizeof(player)); //allocate memory for the new player
       newPlayer->playerNumber = i; //set the player number
@@ -94,48 +130,98 @@ void dealer_init_game(){
       newPlayer->fold = false; //set the player to not folded
       newPlayer->totalBet = 0; //set the player's total bet to 0
       playerQueue[i] = newPlayer; //add the player to the queue
+      numPlayers++;
       
+      }
+      else {
+        Serial.print("Player ");
+        Serial.print(i);
+        Serial.println(" did not respond");
+        playerQueue[i] = NULL;
+      }
     }
-    }
-
-  circleQueueHead = &playerQueue[0]; //starting with the dealer player
+  
+  circleQueueHead = playerQueue[0]; //starting with the dealer player
   
   //initialize the deck and shuffle it
+  Serial.println("Initializing deck...");
+  deck = (Deck_struct*)malloc(sizeof(Deck_struct));
+  if (!deck) {
+    Serial.println("Failed to allocate deck");
+    return;
+  }
   initialize_deck(deck); //initialize the deck with 52 cards
   shuffle_deck(deck); //shuffle the deck using Fisher-Yates algorithm
+  Serial.println("Deck initialized and shuffled.");
 
+
+  lcd.clear();
+  lcd.setCursor(0,0);
+  lcd.print("Setup Complete");
+  lcd.setCursor(0,1);
+  lcd.print(numPlayers);
+  lcd.print(" Players");
+
+
+  delay(2000); //wait for 2 seconds to show the setup is complete
+  lcd.clear();
+  lcd.setCursor(0,0);
+  lcd.print("Game Start!");
 
   //main gameplay loop
-  while(1){
-    if(HC12.available()){
+  while(1) {
+    if(HC12.available()) {
       hc12_receive(0); //receive and process a command packet
     }
-    //operate the queue in the background. ping a player when it is their turn
-    //PUT QUEUE FUNCTIONALITY HERE
-    //ping the player when it is their turn
-    CommandPacket packet;
-    packet.command = CMD_PING; // Set command to PING
-    packet.ID = (*circleQueueHead)->playerNumber; // Set ID to player number
-    packet.betAmount = 0; // Set bet amount to 0
-    packet.card.suit = 'X'; // Set suit to 'X'
-    packet.card.value = -1; // Set value to -1
-    packet.card.friendlyName = 'X'; // Set friendly name to 'X'
-    hc12_send(packet); // Send the packet
-    delay(2000); // Wait for a response
-    hc12_receive(1); //receive the packet in mode 0 to process the command
     
-    circleQueueHead = &playerQueue[currTurn];
-    while (*circleQueueHead == NULL && currTurn < 4) {
+    //operate the queue in the background. ping a player when it is their turn
+    if(circleQueueHead == playerQueue[0]) {
+      //dealer's turn, show the dealer's hand on the LCD
+      static bool dealerTurnDisplayed = false;
+      
+      if (!dealerTurnDisplayed) {
+        lcd.clear();
+        lcd.setCursor(0,0);
+        lcd.print("Your Turn!");
+        lcd.setCursor(0, 1);
+        lcd.print("Press Select");
+        dealerTurnDisplayed = true;
+      }
+      
+      if (analogRead(BTN_PIN) == BTN_SELECT) {
+        dealerTurnDisplayed = false;
+        updateMenu();
+        // Add dealer turn logic here
+          
+        // Move to next player after dealer's turn
         currTurn = (currTurn + 1) % 4;
-        circleQueueHead = &playerQueue[currTurn];
+        circleQueueHead = playerQueue[currTurn];
+      }
+    } else {
+      //iterate if head is null
+      while (circleQueueHead == NULL && currTurn < 4) {
+        currTurn = (currTurn + 1) % 4;
+        circleQueueHead = playerQueue[currTurn];
+      }
+      
+      //player's turn, ping the player and wait for a response
+      CommandPacket packet;
+      packet.command = CMD_PING;
+      packet.ID = (circleQueueHead)->playerNumber;
+      packet.betAmount = 0;
+      packet.card.suit = 'X';
+      packet.card.value = -1;
+      packet.card.friendlyName = 'X';
+      hc12_send(packet);
+      
+      //wait for response
+      while(HC12.available()) {
+        hc12_receive(0);
+      }
+
+      currTurn = (circleQueueHead == playerQueue[3]) ? 0 : (currTurn + 1) % 4;
     }
-
-    currTurn = (*circleQueueHead == playerQueue[3]) ? 0 : (currTurn + 1) % 4;
-
-    //Show menu on LCD
-    checkButtons(); //check for and handle button presses    
   }
-  //free memory for each player
 }
 
 void loop() {

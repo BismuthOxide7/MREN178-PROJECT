@@ -23,6 +23,7 @@ const int pin_BL = 10;
 // Create the LCD object
 LiquidCrystal lcd(pin_RS, pin_EN, pin_d4, pin_d5, pin_d6, pin_d7);
 
+
 // Define global variables 
 Card_struct hidden_dealer_card;
 Card_struct* player_cards = NULL;
@@ -66,7 +67,7 @@ bool Show_Hands() {
     if (buttonValue < 800) { // SELECT - Choose menu option
         lcd.clear();
         lcd.setCursor(0, 0);
-        lcd.print("Returning to Menu");
+        lcd.print("Returning ");
         delay(1000);  // Show selection for 1 second
         return true;
     }

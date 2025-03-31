@@ -7,13 +7,16 @@
 #include "display.h"
 #include <Arduino.h>
 
+
+
+
+
 // Add at the top with other global variables
 const char* menuItems[] = {
+    "View Hands",
     "Hit",
     "Stay", 
-    "Fold",
-    "Bet",
-    "View Hands"
+    "Fold"
 };
 
 int menuIndex = 0;  // Current menu selection
@@ -21,17 +24,17 @@ int menuIndex = 0;  // Current menu selection
 void checkButtons() {
     int buttonValue = analogRead(BTN_PIN);
 
-    if (buttonValue < 200) { // UP - Move menu up
+    if (buttonValue == BTN_UP ||  buttonValue == BTN_RIGHT) { // UP - Move menu up
         menuIndex--;
         if (menuIndex < 0) menuIndex = 4;
         updateMenu();
         delay(300);
-    } else if (buttonValue < 400) { // DOWN - Move menu down
+    } else if (buttonValue == BTN_DOWN || buttonValue == BTN_LEFT){ // DOWN - Move menu down
         menuIndex++;
         if (menuIndex > 4) menuIndex = 0;
         updateMenu();
         delay(300);
-    } else if (buttonValue < 800) { // SELECT - Choose menu option
+    } else if (buttonValue == BTN_SELECT) { // SELECT - Choose menu option
         Serial.print("Selected: ");
         Serial.println(menuItems[menuIndex]);
 
