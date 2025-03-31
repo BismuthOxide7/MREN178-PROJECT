@@ -4,7 +4,7 @@
 #include "actions.h"
 #include "buttons.h"
 #include "display.h"
-#include "dealer.h"
+//#include "dealer.h"
 #include <EEPROM.h>
 #include "wireless.h"
 

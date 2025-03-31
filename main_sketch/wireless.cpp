@@ -6,17 +6,15 @@
 #include <LiquidCrystal.h>
 #include "display.h"
 #include <Arduino.h>
-#include <Arduino.h>
-#include "wireless.h"
-#include "cards.h"
-#include <SoftwareSerial.h>
 
-#define rx = 11, tx = 12
+// Fix the pin definitions
+#define RX_PIN 11
+#define TX_PIN 12
 
-#define BAUDRATE 9600 // Globally delcared baud rate
+#define BAUDRATE 9600 // Globally declared baud rate
 
-// HC-12 instance (declared globally)
-extern SoftwareSerial HC12(tx, rx);  // TX: 10, RX: 11 in #define
+// Fix the HC-12 instance declaration
+extern SoftwareSerial HC12(TX_PIN, RX_PIN);  // TX, RX
 
 // test function (to see if the header files and #includes worked)
 int test_fun() {
@@ -119,6 +117,7 @@ void processCommand(CommandPacket packet) {
             ackPacket.card.value = -1; // Set value to -1
             ackPacket.card.friendlyName = 'X'; // Set friendly name to 'X'
             hc12_send(ackPacket); // Send ACK packet
+            free(&ackPacket); // Free the memory allocated for the ACK packet
             Serial.println("ACK sent"); // debug print
             break;
         case CMD_ACK:
@@ -142,7 +141,8 @@ void processCommand(CommandPacket packet) {
                     is_hidden = 0; // Set is_hidden to 0 if the dealer's card is hidden
                 } else add_visable_dealer_card(newCard); // Add the card to the dealer's visible hand
             }
-            
+            free(&newCard); // Free the memory allocated for the new card
+
             Serial.print("Received Card: ");// debug print
             Serial.print(packet.card.suit);// debug print
             Serial.print(" ");// debug print
@@ -183,7 +183,9 @@ void processCommand(CommandPacket packet) {
             //lcd.print("You lost!"); // Uncomment this line to print "You lost!" to the LCD
             //lcd.print("You have: "); // Uncomment this line to print "You have:" to the LCD
             //print total money to the lcd
-            //lcd.print(player_struct.totalMoney); // Uncomment this line to print the total money to the LCD 
+            //lcd.print(player_struct.totalMoney); // Uncomment this line to print the total money to the LCD
+            //free all allocated memory (hands in display, etc)
+            //rerun setup function
             break;
         default:
             Serial.println("Unknown command received");// debug print
