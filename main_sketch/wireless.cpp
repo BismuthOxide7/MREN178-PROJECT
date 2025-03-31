@@ -54,7 +54,7 @@ int initalise_transciever() {
     delay(100); // Wait
     if(HC12.available()){
         return 0;  // Return success
-    } else return 1; // return failure. 
+    } else return -1; // return failure. 
 }
 
 // Function to send a command packet
@@ -110,11 +110,24 @@ void processCommand(CommandPacket packet) {
     switch (packet.command) { // switch case through the commands enum
         case CMD_PING:
             Serial.println("Received: PING"); // debug print
+            // Send ACK back to sender
+            CommandPacket ackPacket;
+            ackPacket.command = CMD_ACK; // Set command to ACK
+            ackPacket.ID = packet.ID; // Set ID to sender's ID
+            ackPacket.betAmount = 0; // Set bet amount to 0
+            ackPacket.card.suit = 'X'; // Set suit to 'X'
+            ackPacket.card.value = -1; // Set value to -1
+            ackPacket.card.friendlyName = 'X'; // Set friendly name to 'X'
+            hc12_send(ackPacket); // Send ACK packet
+            Serial.println("ACK sent"); // debug print
             break;
         case CMD_ACK:
             Serial.println("Received: ACK");// debug print
+            //do nothing, ack should get picked up in mode 1 receives
             break;
         case CMD_RECEIVE_THIS_CARD:
+            //add card to hand if player ID matches packet ID
+            
             Serial.print("Received Card: ");// debug print
             Serial.print(packet.card.suit);// debug print
             Serial.print(" ");// debug print
@@ -122,6 +135,10 @@ void processCommand(CommandPacket packet) {
             break;
         case CMD_HIT:
             Serial.println("Received: HIT");// debug print
+            // Call hit function with the current player
+            //hit(circleQueueHead); // Uncomment this line to call the hit function
+            // Add the card to the player's hand
+            //add_player_card(packet.card); // Uncomment this line to add the card to the player's hand
             break;
         case CMD_STAY:
             Serial.println("Received: STAY");// debug print

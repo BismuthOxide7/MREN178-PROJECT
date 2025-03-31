@@ -21,9 +21,7 @@ player* circleQueueHead; //points to the current player
 
 
 void setup() {
-  
   Serial.begin(9600); // Serial port to computer
-
   if(ID == 0){
     isDealer = true;
     //DEALER ARDUINO, handles wireless transmission and deck
@@ -55,13 +53,16 @@ void player_init_game(){
   dealer->outOfGame = false; //set the dealer to not out of game
   dealer->totalBet = 0; //set the dealer's total bet to 0
   Dealer_Struct = dealer; //set the player struct to the dealer
-  //We dont care about anything except for the hand for the dealer lol. 
+  //We dont care about anything except for the hand for the dealer - might not be needed
 
   //Start wireless and wait for dealer ping
-
+  initialise_transciever(12,11); //initialize the transceiver
 
   //gameplay loop 
   while(1){
+    if(hc12.available()){
+      hc12_receive(0); //receive and process a command packet
+    }
     //check for button presses, transmit commands, and update display
     //check for dealer message
     //check for player actions and update display
