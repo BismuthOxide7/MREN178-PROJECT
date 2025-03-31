@@ -31,7 +31,7 @@ void hit(player *currPlay)
 
     if (currPlay.totalSum > 21) {
         Serial.printf("Player %d loses! Total: %d\n", currPlay.playerNumber, currPlay.totalSum);
-        currPlay.outOfGame = true;
+        currPlay.over21 = true;
     }
 }
 
