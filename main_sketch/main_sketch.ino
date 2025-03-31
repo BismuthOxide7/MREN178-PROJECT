@@ -40,6 +40,7 @@ void player_init_game(){
   localPlayer->totalSum = 0; //set the starting sum for the player
   localPlayer->head = NULL; //set the head of the hand to null
   localPlayer->next = NULL; //set the next card to null
+  localPlayer->over21 = false; //shows the player didnt lose
   localPlayer->stand = false; //set the player to not out of game
   localPlayer->fold = false; //set the player to not folded
   localPlayer->totalBet = 0; //set the player's total bet to 0
@@ -51,6 +52,7 @@ void player_init_game(){
   dealer->totalSum = 0; //set the starting sum for the dealer
   dealer->head = NULL; //set the head of the hand to null
   dealer->next = NULL; //set the next card to null
+  dealer->over21 = false; //shows the dealer didnt lose
   dealer->stand = false; //set the dealer to not out of game
   dealer->fold = false; //set the dealer to not folded
   dealer->totalBet = 0; //set the dealer's total bet to 0
@@ -82,6 +84,7 @@ void dealer_init_game(){
   dealer->totalSum = 0; //set the starting sum for the dealer
   dealer->head = NULL; //set the head of the hand to null
   dealer->next = NULL; //set the next card to null
+  dealer->over21 = false; //shows the dealer didnt lose
   dealer->stand = false; //set the dealer to not out of game
   dealer->fold = false; //set the dealer to not folded
   dealer->totalBet = 0; //set the dealer's total bet to 0
