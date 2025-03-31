@@ -1,12 +1,4 @@
-#include <SoftwareSerial.h>
-#include "wireless.h"
-#include "cards.h"
-#include "actions.h"
-#include "buttons.h"
-#include "display.h"
-//#include "dealer.h"
-#include <EEPROM.h>
-#include "wireless.h"
+#include "game.h"
 
 extern bool isDealer = false;
 extern int ID;
@@ -44,7 +36,7 @@ void player_init_game(){
   localPlayer->stand = false; //set the player to not out of game
   localPlayer->fold = false; //set the player to not folded
   localPlayer->totalBet = 0; //set the player's total bet to 0
-  Player_Struct = localPlayer; //set the player struct to the local player
+  This_Player_Struct = localPlayer; //set the player struct to the local player
 
   //Start wireless and wait for dealer ping
   initialise_transciever(); //initialize the transceiver
@@ -77,7 +69,7 @@ void dealer_init_game(){
   dealer->stand = false; //set the dealer to not out of game
   dealer->fold = false; //set the dealer to not folded
   dealer->totalBet = 0; //set the dealer's total bet to 0
-  Player_Struct = dealer; //set the player struct to the dealer
+  This_Player_Struct = dealer; //set the player struct to the dealer
   playerQueue[0] = dealer; //set the dealer as the first player in the queue
   
     
@@ -125,29 +117,11 @@ void dealer_init_game(){
     free(&packet); //free the packet memory
     delay(2000); // Wait for a response
     hc12_receive(1); //receive the packet in mode 0 to process the command
-    if(circleQueueHead = playerQueue[3])
-    {
-      circleQueueHead = playerQueue[0];
-      currTurn = 1;
-    }
-    else
-    {
-      circleQueueHead = playerQueue[currTurn];
-      currTurn++;
-      if(playerQueue[currTurn] == NULL)
-        {
-          if(circleQueueHead = playerQueue[3])
-          {
-          circleQueueHead = playerQueue[0];
-          currTurn = 1;
-          }
-          else {
-          circleQueueHead = playerQueue[currTurn];
-          currTurn++;
-        }
-      }
-    }
     
+    circleQueueHead = (playerQueue[currTurn] != NULL) ? playerQueue[currTurn] : (playerQueue[(currTurn + 1) % 4] != NULL) ? playerQueue[(currTurn + 1) % 4] : (playerQueue[(currTurn + 2) % 4] != NULL) ? playerQueue[(currTurn + 2) % 4] : playerQueue[(currTurn + 3) % 4];
+
+    currTurn = (circleQueueHead == playerQueue[3]) ? 0 : (currTurn + 1) % 4;
+
     //Show menu on LCD
     checkButtons(); //check for and handle button presses    
   }

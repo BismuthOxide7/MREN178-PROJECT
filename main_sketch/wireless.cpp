@@ -7,6 +7,9 @@
 #include "display.h"
 #include <Arduino.h>
 
+// Declare the ID variable as extern to reference the one in main.ino
+extern int ID;
+
 // Fix the pin definitions
 #define RX_PIN 11
 #define TX_PIN 12
@@ -68,7 +71,7 @@ void hc12_send(CommandPacket packet) {
 
 
 // Function to receive a command packet
-CommandPacket hc12_receive(int mode = 0) {
+CommandPacket hc12_receive(int mode) {
     String data = "";
   
     // If HC-12 has data, read it until '>'

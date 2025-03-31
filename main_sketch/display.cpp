@@ -11,16 +11,17 @@
 #include "display.h"
 #include <LiquidCrystal.h>
 
-// initialize the library by associating any needed LCD interface pin
-// with the arduino pin number it is connected to      
-const int pin_RS = 8; 
-const int pin_EN = 9; 
-const int pin_d4 = 4; 
-const int pin_d5 = 5; 
-const int pin_d6 = 6; 
-const int pin_d7 = 7; 
-const int pin_BL = 10; 
-LiquidCrystal lcd(pin_RS,  pin_EN,  pin_d4,  pin_d5,  pin_d6,  pin_d7);
+// Define pin constants
+const int pin_RS = 8;
+const int pin_EN = 9;
+const int pin_d4 = 4;
+const int pin_d5 = 5;
+const int pin_d6 = 6;
+const int pin_d7 = 7;
+const int pin_BL = 10;
+
+// Create the LCD object
+LiquidCrystal lcd(pin_RS, pin_EN, pin_d4, pin_d5, pin_d6, pin_d7);
 
 // Define global variables 
 struct Card_struct hidden_dealer_card;
@@ -37,7 +38,7 @@ struct Node createNode(struct Card_struct card){
 }
 
 // Update LCD display with linked lists and hidden card 
-void Show_Hands(){
+bool Show_Hands(){
   lcd.clear();
   lcd.setCursor(0,0);
   lcd.print("P: ");
@@ -61,6 +62,15 @@ void Show_Hands(){
   while(transverser != NULL){
     lcd.print(transverser -> card.friendlyName);
     transverser = transverser.next;
+  }
+  //return true on any button press
+  int buttonValue = analogRead(BTN_PIN);
+  if (buttonValue < 800) { // SELECT - Choose menu option
+    lcd.clear();
+    lcd.setCursor(0, 0);
+    lcd.print("Returning to Menu");
+    delay(1000);  // Show selection for 1 second
+    return true; //return true on any button press
   }
 }
 

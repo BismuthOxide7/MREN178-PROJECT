@@ -1,5 +1,5 @@
-#ifndef _cards_h
-#define _cards_h
+#ifndef CARDS_H_
+#define CARDS_H_
 
 #include <Arduino.h>
 
@@ -22,4 +22,4 @@ void initialize_deck(Deck_struct &deck);  // Initialize deck with 52 cards
 Card_struct draw_card(Deck_struct &deck);  // Draw a card from the deck
 void shuffle_deck(Deck_struct &deck);  // Shuffle the deck using Fisher-Yates algorithm
 
-#endif
+#endif /* CARDS_H_ */

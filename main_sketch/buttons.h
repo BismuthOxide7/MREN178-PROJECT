@@ -1,8 +1,8 @@
-#ifndef BUTTONS_H
-#define BUTTONS_H
+#ifndef BUTTONS_H_
+#define BUTTONS_H_
 
 #include <Arduino.h>
-#include <LiquidCrystal.h> 
+#include "display.h"  // This gives us LCD functionality
 
 // LCD Keypad Shield uses A0 for button input
 #define BTN_PIN A0  
@@ -15,4 +15,4 @@ extern int menuIndex;
 void checkButtons();
 void updateMenu();
 
-#endif
+#endif /* BUTTONS_H_ */

@@ -4,12 +4,12 @@
 #include "cards.h"
 #include <Arduino.h>
 
-extern typedef struct player {
+typedef struct player {
     int playerNumber;
     int totalMoney = 100;
     int totalSum = 0;          
-    *Card_struct head;
-    *Card_struct next;
+    Card_struct* head;
+    Card_struct* next;
     bool over21 = false; // if the player goes above 21
     bool stand = false;
     bool fold = false;
@@ -18,6 +18,6 @@ extern typedef struct player {
 
   //function prototypes
   
-  makePlayer(int number, *Card_struct heads)
+  makePlayer(int number, Card_struct* heads)
 
 #endif

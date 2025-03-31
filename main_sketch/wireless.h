@@ -20,6 +20,7 @@ typedef enum {
 
 // Struct to hold a command and optional card data
 typedef struct {
+    int ID;         // Player ID (0 for dealer, 1-3 for players)
     CommandType command;  // Command type
     int betAmount;      // Bet amount (optional)
     Card_struct card;     // Card (optional)
@@ -32,6 +33,6 @@ bool startUp(int playerNumber);
 void processCommand(CommandPacket packet);
 int initialise_transciever();
 void hc12_send(CommandType cmd, Card_struct card = {'X', -1, 'X'});
-void hc12_receive(int mode = 0);
+void hc12_receive(int mode);
 
 #endif
