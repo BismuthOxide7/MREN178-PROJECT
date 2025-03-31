@@ -124,35 +124,34 @@ int add_visable_dealer_card(Card_struct &card) {
     Show_Hands(); // Changed from update_LCD() to match current implementation
     return 0;
 }
-int clear_list(Node* p_head){
-  Node *p_temp;
-  Node *p_tail;
-  while (p_head != NULL) {
-      p_temp = p_head;
-      // Checking if there is only one node in the list and if so deleting it 
-      if(p_temp -> next == NULL){
-        p_head = NULL;
-        free(p_temp);
-      }
-      // Search for the node preceeding the tail node. Once found, date the old tail node, and update this preceeding node to become 
-      // The new tail node by setting p_next_node to null and setting p_tail to point to this node 
-      else{
-        while (p_temp -> next -> next != NULL){
-          p_temp=p_temp->next;
+int clear_list(Card_struct* p_head) {
+    Card_struct *p_temp;
+    Card_struct *p_tail;
+    while (p_head != NULL) {
+        p_temp = p_head;
+        // Checking if there is only one node in the list and if so deleting it 
+        if(p_temp->next == NULL) {
+            p_head = NULL;
+            free(p_temp);
         }
-        p_tail = p_temp -> next;
-        p_temp -> next = NULL;
-        free(p_tail); 
-      }
+        // Search for the node preceding the tail node
+        else {
+            while (p_temp->next->next != NULL) {
+                p_temp = p_temp->next;
+            }
+            p_tail = p_temp->next;
+            p_temp->next = NULL;
+            free(p_tail); 
+        }
     }
-  return 0;
+    return 0;
 }
 // delete all pre-existing cards in linked lists and hidden dealer card
 int new_game (){
   clear_list(player_cards);
   clear_list(dealer_cards);
-  hidden_dealer_card = NULL;
+  hidden_dealer_card = make_card('X', -1, 'X'); // Set hidden dealer card to invalid
   
-  update_LCD(); 
+  Show_Hands(); 
   return 0;
 }

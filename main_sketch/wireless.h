@@ -3,7 +3,15 @@
 
 #include <Arduino.h>
 #include <stdint.h>
+#include <SoftwareSerial.h>
 #include "cards.h"
+
+// Pin definitions for HC12
+#define RX_PIN 11
+#define TX_PIN 12
+
+// Declare HC12 as extern
+extern SoftwareSerial HC12;
 
 // Define available commands
 typedef enum {

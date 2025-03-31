@@ -5,8 +5,6 @@
 bool isDealer = false;
 int ID;
 
-extern SoftwareSerial HC12;
-
 extern Deck_struct* deck = NULL;
 
 // Player structs
@@ -89,12 +87,16 @@ void dealer_init_game(){
       newPlayer->totalMoney = 100; //set the starting money for the player
       newPlayer->totalSum = 0; //set the starting sum for the player
       newPlayer->head = NULL; //set the head of the hand to null
+      newPlayer->over21 = false; //shows the player didnt lose
+      newPlayer->stand = false; //set the player to not out of game
+      newPlayer->fold = false; //set the player to not folded
+      newPlayer->totalBet = 0; //set the player's total bet to 0
       playerQueue[i] = newPlayer; //add the player to the queue
-      playerQueue[i]->outOfGame = false; //set the player to not out of game
+      
     }
     }
 
-  circleQueueHead = playerQueue[0]; //starting with the dealer player
+  circleQueueHead = &playerQueue[0]; //starting with the dealer player
   
   //initialize the deck and shuffle it
   initialize_deck(deck); //initialize the deck with 52 cards

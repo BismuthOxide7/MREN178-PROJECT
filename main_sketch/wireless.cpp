@@ -16,8 +16,8 @@ extern int ID;
 
 #define BAUDRATE 9600 // Globally declared baud rate
 
-// Fix the HC-12 instance declaration
-extern SoftwareSerial HC12(TX_PIN, RX_PIN);  // TX, RX
+// Define the HC12 object
+SoftwareSerial HC12(TX_PIN, RX_PIN);  // TX, RX
 
 // test function (to see if the header files and #includes worked)
 int test_fun() {
