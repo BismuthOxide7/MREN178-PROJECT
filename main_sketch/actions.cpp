@@ -4,66 +4,70 @@
 #include "cards.h"
 #include "actions.h"
 
-int tokens;
-int numPlayers = 4;
-**Card_Struct p1,p2,p3,p4;
-**Card_Struct[] players = {p1,p2,p3,p4} // Setting empty array to hold poiters to each players linked list
-
-
-
-void hit(player *currPlay) 
+void hit(Player *currPlay) 
 {
-    Card_Struct *newCard = (Card_Struct *)malloc(sizeof(Card_Struct));
-    *newCard = draw_Card();  // Assign the drawn card
-    newCard->next = NULL;    // Ensure new card's next is NULL
-
-    Card_Struct *traverse = currPlay->head;
-    
-    if (traverse == NULL)  // Case when the list is empty
-    {
-        currPlay->head = newCard;
+    Card_Struct *newCard = (Card_Struct *)malloc(sizeof(Card_Struct)); // Sanity check- make sure the arduino is okay (sufficient memory cuz they're small)
+    if (!newCard) {
+        Serial.println("Memory allocation failed- womp womp");
+        return;
     }
-    else
-    {
-        while (traverse->next != NULL)
-        {
+    
+    *newCard = draw_Card();  // Assign the drawn card
+    newCard->next = NULL;
+
+    if (currPlay->head == NULL) {
+        currPlay->head = newCard;
+    } 
+    
+    else {
+        Card_Struct *traverse = currPlay->head;
+        while (traverse->next != NULL) {
             traverse = traverse->next;
         }
-        traverse->next = newCard;  // add new card at end
+        traverse->next = newCard;
     }
 
-    currPlay->totalSum += newCard->value;  // Update total sum
+    currPlay.totalSum += newCard->value;
+
+    if (currPlay.totalSum > 21) {
+        Serial.printf("Player %d loses! Total: %d\n", currPlay.playerNumber, currPlay.totalSum);
+        currPlay.outOfGame = true;
+    }
+}
+
+void stand(Player *currPlay)
+{
+    Serial.printf("Player %d stands with a total: %d\n", currPlay.playerNumber, currPlay.totalSum);
+    currPlay.outOfGame = true;
+}
+
+void fold(Player *currPlay)
+{
+    currPlay.totalBet *= 0.5;
+    Serial.printf("Player %d folds! Half the bet is retracted, leaving %d. Player card total: %d\n", currPlay.playerNumber, currPlay.totalBet, currPlay.totalSum);
+    currplay.outOfGame = true;
+}
+
+void initialBet(Player *currPlay)
+{
+    Serial.printf("Place your initial bet. You have %d dollars.\n", currPlay.tokens);
     
-    if (currPlay->totalSum > 21)
-    {
-        //Make them lose- Talk to Erin / Yasmine
-        printf("Player %d loses! Total: %d\n", currPlay.playerumber, currPlay->totalSum);
+    int potBet = 0; //CHANGE THIS CHANGE THIS !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    
+    while(potBet > currPlay.tokens) {
+        Serial.println("Insufficient funds. Please put in a value within your range");
+        //ash again when know how
     }
+    currPlay.totalBet = potBet;
 }
 
-void stand(player currPlay)
+void doubleDown(Player *currPlay)
 {
-    //how to next turn?
-    printf("Player %d stands with a total: %d\n", currPlay.playerumber, currPlay->totalSum);
-}
-
-void fold(player currPlay)
-{
-    currPlay.totalBet *= (1/2);
-    printf("Player %d folds! hal the bet in retracted, leaving %d. Player card Total: %d\n", currPlay.playerumber, currPlay.totalBet, currPlay->totalSum);
-}
-
-int initialBet(player currPlay)
-{
-    Serial.println("Place your initial bet. You have %n dollers.", tokens);
-    int potBet = 
-    while()
-
-}
-
-int doubleDown(player currPlay)
-{
-    if()
-    currPlay.totalBet *= 2;
-    return (currPlay.totalBet);
+    if (currPlay.tokens >= currPlay.totalBet) {
+        currPlay.tokens -= currPlay.totalBet;
+        currPlay.totalBet *= 2;
+        Serial.printf("Player %d doubles down to bet %d.\n", currPlay.playerNumber, currPlay.totalBet);
+    } else {
+        Serial.println("Not enough tokens to double down.");
+    }
 }
