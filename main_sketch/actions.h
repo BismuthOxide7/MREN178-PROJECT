@@ -10,7 +10,8 @@ extern typedef struct player {
     int totalSum = 0;          
     *Card_struct head;
     *Card_struct next;
-    bool outOfGame = false;
+    bool stand = false;
+    bool fold = false;
     int totalBet = 0;
   } player;
 
